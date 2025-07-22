@@ -4,5 +4,12 @@
 core*
 *.nfs*
 *.rds
-log/*
-output*/
+*.RDS
+README.html
+/my_results.R
+config/my_options.yaml
+log/
+cache/
+input/*
+!input/demo.yaml
+output/
