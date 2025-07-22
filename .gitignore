@@ -1,0 +1,8 @@
+.Rproj.user
+.Rhistory
+.DS_Store
+core*
+*.nfs*
+*.rds
+log/*
+output*/
