@@ -1,0 +1,857 @@
+---
+
+# ---- Simulation settings ----
+
+# Number of people to simulate
+population_size: 100000
+
+# Number of days to simulate
+n_days: 365
+
+# ---- Initialisation settings ----
+
+# Proportion of population previously infected
+previously_infected: 0.5  # TODO: We will need a better initialisation process 
+
+# Number of days over which these past infections have occured
+n_days_init: -3650  # 10 years
+
+# Seasonality profile (must output a 365-element vector)
+#
+# NOTE: This function is subsequently normalised (between 0 and 1)
+seasonality_fn:
+  fn: "@() cospi(x = seq(-1, 1, length.out = 365))"
+  
+# Proportional difference between min and max seasonality effect
+seasonality_scaler: 0.3  # Set to zero to turn off seasonality effect
+
+# Number of days to shift seasonality start
+seasonality_shift: 120  # 0 represents mid-winter
+
+# ---- Air pollution factors ----
+
+# Units (microgram/m^3) of increase in air pollutant exposure
+# air_pollution_exposure: 0
+
+# Increase in susceptibility/severity per microgram / m^3 of air polutant
+#
+# SOURCE: https://www.sciencedirect.com/science/article/pii/S0269749120365489
+# air_pollution:
+#   susceptibility: 1.0  # Increase in susceptibility per microgram / m^3 of air polutant
+#   severity: 1.0        # Increase in severity per microgram / m^3 of air polutant
+
+# Relationship between pollution exposure and susceptibility/severity
+# air_pollution_relationship: "linear"  # OPTIONS: 'linear', 'log' or 'log10'
+
+# ---- Effective reproduction number ----
+
+# Transmission probability at maximum infecitivty, susceptibility, and seasonality
+beta: 0.05
+
+# Average number of contacts per person (placeholder)
+#
+# NOTE: This parameter is calibrated in most use cases (see calibration_parameters)
+contacts: 10.0
+
+# ---- Network structure ----
+
+# Network structure
+#
+# OPTIONS: "random", "age", or "layers"
+network_structure: "random"
+
+# Network layers - only relevant if network structure is set to "layers"
+#
+# OPTIONS: "household", "school", "workplace"
+# network_layers: household, school, workplace
+
+# Countries to pull network matrix data from
+contact_matrix_countries: DE  # ISO Alpha-2 country codes (en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+
+# ---- Importations ----
+
+# Importated infections per day
+importations: 1.0  # per 100k people
+
+# ---- Viral variants ----
+
+# Primary variant (properties relative to prognosis probabilities)
+# variant_primary:
+#   id: omicron
+#   name: "Omicron"
+#   infectivity: 14.4
+#   severity: 1.54
+#   immuno_escape: 0.0
+
+# Novel variant properties (properties relative to primary variant)
+# variants_novel:
+# - id: novel_variant
+#   name: "Novel variant template"
+#   import_day: 0
+#   import_number: 0 # Set import_number to zero to turn off novel variant importation
+#   infectivity: 1.0
+#   severity: 1.0
+#   immuno_escape: 0.0
+
+# Whether infectiousness is proportional to viral load
+#
+# NOTE: Alternatively, infectiouness is considered constant over course of infection
+viral_load_infectivity: yes
+
+# Viral load profile
+viral_load_shape_fn:
+  fn: "dgamma"
+  shape: 3.0
+  rate: 0.5
+  
+# Maximum number of days of viral load shedding (following latent period)
+#
+# NOTE: viral_load_shape_fn is evaluated over 1 : viral_load_shed_days
+viral_load_shed_days: 42  # 6 weeks
+
+# ---- Natural immunity ----
+
+# Immunity from mother
+#
+# NOTE: First pass is to have a standard maternal immunity profile. In next versions this should 
+#       consider the infection status/history of either 1) the whole population, 2) all women of 
+#       child-bearing age, or 3) the individual mother. 
+maternal_immunity:
+  fn: "seq"
+  from: 0.5
+  to: 0
+  length.out: 180
+
+# Immunity through natural infection
+#
+# NOTE: This function is evaluated for all possible time points
+acquired_immunity:
+  fn: "logistic_inv"
+  slope: 1.8
+  mid: 105
+  lb: 0.15
+  ub: 0.95
+  
+# OPTIONS: 
+#   "max": only largest immunity contributor is considered
+#  "prod": all immunity multiplied, converging to 1
+#   "sum": sum of all immunity, capped at 1
+hybrid_immunity: "prod"
+
+# ---- Priority and risk groups ----
+
+# Priority group definitions
+# priority_groups:
+# - id: high_priority
+#   name: "65+ or comorbidities"
+#   priority: 1
+#   condition: "age >= 65 | comorbidities == TRUE"
+# - id: low_priority
+#   name: "18-65 year olds"
+#   priority: 2
+#   condition: "age >= 18 & age < 65"
+
+# Risk groups
+# risk_groups:
+#   comorbidities:
+#     id: "c"
+#     age_lower: 0
+#     age_upper: 75
+#     age_dist:
+#       fn: "dunif"
+#     probability: 0.08
+#   healthcare_worker:
+#     id: "h"
+#     age_lower: 18
+#     age_upper: 65
+#     age_dist:
+#       fn: "dunif"
+#     probability: 0.10
+#   vax_unsuitable:
+#     id: "v"
+#     age_lower: 12
+#     age_upper: 90
+#     age_dist:
+#       fn: "dbeta"
+#       shape1: 4
+#       shape2: 1
+#     probability: 0.035  # Approx 2% of population
+
+# ---- Vaccination details ----
+
+# Vaccine definition and immunity profile
+# vaccine_defintion:
+#   name: "mRNA vaccine"
+#   infection_blocking: 0.85  # Proportion of efficacy that blocks infection
+#   efficacy:
+#     fn: ["logistic_inv", "logistic_inv"]
+#     slope: [1.8, 1.8]
+#     mid: [21, 70]
+#     lb: [0.10, 0.10]
+#     ub: [0.40, 0.85]
+#   subsequent_dose_days: 28  # Use 0 for a single dose vaccine
+#   booster_efficacy:
+#     fn: "logistic_inv"
+#     slope: 1.8
+#     mid: 105
+#     lb: 0.15
+#     ub: 0.85
+
+# Vaccine updates that effectively protect from exposure to all currently circulating variants
+# vaccine_update:
+# - id: next_gen_vaccine
+#   name: "Next generation vaccine"
+#   release_day: no  # Set to integer to use
+
+# Primary vaccination rollout (use -ve for past days, +ve for future days)
+# vaccine_rollout:
+# - id: high_priority
+#   coverage: 0.8
+#   start: -180   # Day index for primary vaccination to begin
+#   end: -150     # Day index for primary vaccination to reach 'coverage'
+# - id: low_priority
+#   coverage: 0.6
+#   start: -150
+#   end: -120
+
+# Vaccine booster rollout (only groups to recieve a booster need to be specified)
+# booster_doses: 1000  # Maximum number of doses per day (per 100,000 people)
+# booster_rollout:
+# - id: high_priority
+#   probability: 0.0   # Probability of accepting/receiving a booster dose
+#   cycle_period: 365  # Booster dose administered every cycle_period days
+#   start: 0           # When booster started to be available (-ve for past, +ve for future, 0 for start of analysis period)
+#   force_start: no    # Force a booster at this time regardless of when initial vaccination was (set to 'no' to turn off)
+#   force_end: no      # Force an end point to stop cyclic boosters (set to 'no' to turn off)
+
+# Per vaccine dose risk scaler for ICU and death (assumed to not wane over time)
+#
+# See: www.ncbi.nlm.nih.gov/pmc/articles/PMC9278128/
+# Also see exposure_response relationship parameters
+# dose_response:
+#   icu_risk_factor: 0.66  # [95% CI 0.62-0.71]
+#   death_risk_factor: 0.78  # [95% CI 0.72-0.84]
+
+# Maximum number of vaccine doses to count per person
+# max_dose_count: 10
+
+# ---- PrEP details ----
+
+# Pre-exposure prophylaxis immunity profile
+# prep_definition:
+#   name: "Monoclonal-antibody PrEP"
+#   infection_blocking: 0.0  # TODO: Not yet implemented (may not even need it)
+#   efficacy:
+#     fn: "logistic_inv"
+#     slope: 1.8
+#     mid: 180 # From nejm.org/doi/full/10.1056/NEJMoa2116620
+#     lb: 0.7
+#     ub: 0.98
+
+# Pre-exposure prophylaxis coverage scale up
+# prep_rollout:
+#   coverage: 0.0  # Of those of unsuitable for vaccination
+#   start: 0
+#   end: 0
+#   # time_dist:
+#   #   fn: "dunif"
+
+# ---- Treatment details ----
+
+# Probability of treatment given diagnosis
+# treat_rollout:
+# - id: high_priority
+#   # product: "product1"
+#   vaccine_condition: "none"  # OPTIONS: "vaccinated", "unvaccinated", "none"
+#   mild: yes      # Flag for treating those with mild symptoms
+#   severe: yes    # Flag for treating those with severe symptoms (in hospital)
+#   crit: yes      # Flag for treating those in critical condition (in ICU)
+#   coverage: 0.0  # Coverage of all those eligible (defined by mild, severe, crit flags)
+#   available: 0   # Day index of when treatment becomes available for this group
+# - id: low_priority
+#   # product: "product2"
+#   vaccine_condition: "none"
+#   mild: yes
+#   severe: yes
+#   crit: yes
+#   coverage: 0.0
+#   available: 0
+
+# Delay from diagnosis to treatment effect
+# treat_delay: 5
+#   # fn: "rnorm"
+#   # mean: 2.0
+#   # sd: 1
+
+# Treatment efficacy: reduction in probability of hospitalisation
+# treat_efficacy: 0.89
+
+# Alternative way to define treatment efficacy for individual products
+#
+# TODO: Not yet implemented
+# treat_products:
+# - id: product1
+#   name: "Some treatment"
+#   efficacy: 0.89
+# - id: product2
+#   name: "Some other treatment"
+#   efficacy: 0.3
+
+# ---- Other interventions ----
+
+# Future non-pharmaceutical intervention effect
+npi_effect: 0.0  # Set to 0.0 to turn off NPI effect
+npi_scaler: 1.0
+
+# Testing and diagnosis
+# diagnosis_delay: 3  # Delay between symptom onset and test/diagnosis
+# testing:
+#   without_symptoms:
+#     sensitivity: 0.98
+#     probability: 0.05
+#     age_dist:
+#       fn: "dunif"
+#   with_symptoms:
+#     sensitivity: 0.98
+#     probability: 0.8
+#     age_dist:
+#       fn: "dunif"
+#   mass_testing:
+#     sensitivity: 0.7
+#     probability: 0.5  # Interpret this as 'mass testing acceptance'
+#     age_dist:
+#       fn: "dgamma"
+#       shape: 1.4
+#       rate: 1.0
+#     when:
+#       fn: "seq"
+#       from: 240
+#       to: 300
+#       by: 30
+#     coverage: 0.0
+
+# Isolation
+# isolation:
+#   probability: 1.0
+#   delay: 0
+#   duration: 10
+
+# ---- Biological and epidemiological parameters ----
+
+# For all age-dependent functions, x is a vector of ages 0 : max_age
+
+# Age-related probabiliy of being asymptomatic
+asymptomatic_age:
+  fn: "@(x, c) c"
+  c: 0.4  # 40% probability regardless of age
+
+# Age-related probabiliy of severe disease given person is symptomatic
+#
+# NOTE: Useful tool for visualising quadratic coefficients:
+#       https://www.mathpapa.com/graphing-calculator/
+severe_symptom_age:
+  fn: "@(x, a, b, c) a*x^2 + b*x + c"
+  a: 0.00004
+  b: -0.004
+  c: 0.1
+
+# Age-related probabiliy of death given person is severe
+death_severe_age:
+  fn: "@(x, c) c"
+  c: 0.1  # 10% mortality rate for any hospitalised case (regardless of age)
+
+# Per exposure risk scaler for ICU and death (assumed to not wane over time)
+#
+# See:
+#  1) www.sciencedirect.com/science/article/pii/S016344532200010X
+#  2) www.thelancet.com/journals/lancet/article/PIIS0140-6736(22)00089-7/fulltext
+# Also see dose_response relationship parameters
+# exposure_response:
+#   icu_risk_factor: 0.4  # Calculated from (1)
+#   death_risk_factor: 0.65  # Calculated from (1)
+
+# Maximum number of infections to count per person
+max_infection_count: 10
+
+# Disease state durations
+durations:
+  latency_phase:
+    fn: "rnorm"
+    mean: 3.0
+    sd: 1.0
+  asymptomatic_case:
+    fn: "rnorm"
+    mean: 5.0
+    sd: 1.0
+  mild_case:
+    fn: "rnorm"
+    mean: 8.0
+    sd: 1.0
+  onset_to_hospital:
+    fn: "rnorm"
+    mean: 6.0
+    sd: 1.0
+  hospital_stay_recover:
+    fn: "rnorm"
+    mean: 3.0
+    sd: 1.0
+  hospital_stay_death:
+    fn: "rnorm"
+    mean: 7.0
+    sd: 1.0
+
+# ---- Demography ----
+
+# Age-related probabiliy of non-COVID 'natural' death
+#
+# NOTE: This function is evaluated for all ages 1 : age_max
+natural_death_age:
+  fn: "logistic"
+  slope: 10
+  mid: 90
+  lower: 0
+  upper: 0.0008
+
+# Flag for modelling non-COVID 'natural' deaths
+natural_deaths: yes
+
+# Flag for replacing COVID-related deceased with newborns
+#
+# NOTE: Natural deaths are replaced with newborns regardless
+replace_deceased: yes
+
+# Flag for ageing people each year
+annual_ageing: yes
+
+# Distribution of female child bearing age
+child_bearing_age:
+  fn: "rgamma"
+  shape: 52  # Mean age of 26
+  rate: 2
+
+# Proportion of females in the population
+female_proportion: 0.52
+
+# Maximum age of modelled individuals
+age_max: 90
+
+# Yearly bins for ages [0-1], (1-2], ..., age_max required
+#
+# TODO: Use actual data for female-male disaggregation
+demography:
+  female: 
+    1: 0.010576408
+    2: 0.010811583
+    3: 0.010896688
+    4: 0.010928522
+    5: 0.010773903
+    6: 0.010815481
+    7: 0.010274967
+    8: 0.010219097
+    9: 0.010108005
+    10: 0.010069676
+    11: 0.009903364
+    12: 0.009705868
+    13: 0.009469393
+    14: 0.009229020
+    15: 0.009076351
+    16: 0.009010736
+    17: 0.008773611
+    18: 0.008846372
+    19: 0.008671615
+    20: 0.009396632
+    21: 0.009362849
+    22: 0.009643501
+    23: 0.010252229
+    24: 0.010779750
+    25: 0.011226064
+    26: 0.012029040
+    27: 0.013095126
+    28: 0.014302188
+    29: 0.015094119
+    30: 0.015867860
+    31: 0.016164753
+    32: 0.016590278
+    33: 0.016572737
+    34: 0.016617563
+    35: 0.016702019
+    36: 0.016664988
+    37: 0.016307028
+    38: 0.016560394
+    39: 0.016357701
+    40: 0.016451901
+    41: 0.015739878
+    42: 0.015550827
+    43: 0.014973933
+    44: 0.014849848
+    45: 0.014560101
+    46: 0.014482792
+    47: 0.014238521
+    48: 0.014273603
+    49: 0.014756298
+    50: 0.014849198
+    51: 0.015016160
+    52: 0.015149989
+    53: 0.015090871
+    54: 0.015155187
+    55: 0.014944048
+    56: 0.014902470
+    57: 0.014335320
+    58: 0.013497263
+    59: 0.012972991
+    60: 0.012270712
+    61: 0.011689269
+    62: 0.011112374
+    63: 0.010712186
+    64: 0.010361371
+    65: 0.009848143
+    66: 0.009359601
+    67: 0.008911338
+    68: 0.009055562
+    69: 0.008541034
+    70: 0.008761267
+    71: 0.008426694
+    72: 0.008458528
+    73: 0.008419548
+    74: 0.008336392
+    75: 0.008068084
+    76: 0.007888779
+    77: 0.007581491
+    78: 0.007091001
+    79: 0.006626496
+    80: 0.005900830
+    81: 0.005523380
+    82: 0.005232333
+    83: 0.004715207
+    84: 0.004624255
+    85: 0.004337107
+    86: 0.003957058
+    87: 0.003471764
+    88: 0.003121599
+    89: 0.002766237
+    90: 0.011291680
+  male: 
+    1: 0.010576408
+    2: 0.010811583
+    3: 0.010896688
+    4: 0.010928522
+    5: 0.010773903
+    6: 0.010815481
+    7: 0.010274967
+    8: 0.010219097
+    9: 0.010108005
+    10: 0.010069676
+    11: 0.009903364
+    12: 0.009705868
+    13: 0.009469393
+    14: 0.009229020
+    15: 0.009076351
+    16: 0.009010736
+    17: 0.008773611
+    18: 0.008846372
+    19: 0.008671615
+    20: 0.009396632
+    21: 0.009362849
+    22: 0.009643501
+    23: 0.010252229
+    24: 0.010779750
+    25: 0.011226064
+    26: 0.012029040
+    27: 0.013095126
+    28: 0.014302188
+    29: 0.015094119
+    30: 0.015867860
+    31: 0.016164753
+    32: 0.016590278
+    33: 0.016572737
+    34: 0.016617563
+    35: 0.016702019
+    36: 0.016664988
+    37: 0.016307028
+    38: 0.016560394
+    39: 0.016357701
+    40: 0.016451901
+    41: 0.015739878
+    42: 0.015550827
+    43: 0.014973933
+    44: 0.014849848
+    45: 0.014560101
+    46: 0.014482792
+    47: 0.014238521
+    48: 0.014273603
+    49: 0.014756298
+    50: 0.014849198
+    51: 0.015016160
+    52: 0.015149989
+    53: 0.015090871
+    54: 0.015155187
+    55: 0.014944048
+    56: 0.014902470
+    57: 0.014335320
+    58: 0.013497263
+    59: 0.012972991
+    60: 0.012270712
+    61: 0.011689269
+    62: 0.011112374
+    63: 0.010712186
+    64: 0.010361371
+    65: 0.009848143
+    66: 0.009359601
+    67: 0.008911338
+    68: 0.009055562
+    69: 0.008541034
+    70: 0.008761267
+    71: 0.008426694
+    72: 0.008458528
+    73: 0.008419548
+    74: 0.008336392
+    75: 0.008068084
+    76: 0.007888779
+    77: 0.007581491
+    78: 0.007091001
+    79: 0.006626496
+    80: 0.005900830
+    81: 0.005523380
+    82: 0.005232333
+    83: 0.004715207
+    84: 0.004624255
+    85: 0.004337107
+    86: 0.003957058
+    87: 0.003471764
+    88: 0.003121599
+    89: 0.002766237
+    90: 0.011291680
+
+# ---- Health economics ----
+
+# Cost units (used for plotting purposes only)
+# currency: "USD"
+
+# Costs per event (overall, NOT per day)
+healthcare_costs:
+  hospital: 1000  # Cost per hospitalisation
+#   icu: 5000       # Additional cost per ICU entry
+
+# Cost per pharmaceutical intervention unit
+# intervention_costs:
+#   vaccine: 20    # Cost per vaccine dose
+#   prep: 20       # Cost per PrEP cose
+#   treatment: 20  # Cost per treatment round
+
+# ---- Model metrics ----
+
+# Define model metrics to report and by which grouping
+model_metrics:
+  all_new_infections:
+    report: yes
+    by: age #, priority_group, vaccine_type, variant
+  confirmed:
+    report: no
+    by: none
+  hospital_admissions:
+    report: yes
+    by: age
+  hospital_beds:
+    report: yes
+    by: none # priority_group, vaccine_type, vaccine_doses
+  # icu_admissions:
+  #   report: no
+  #   by: none
+  # icu_beds:
+  #   report: yes
+  #   by: priority_group, vaccine_type, vaccine_doses
+  deaths:
+    report: yes
+    by: age # priority_group, vaccine_type, vaccine_doses, variant
+  recovered:
+    report: yes
+    by: none
+  new_local_infections:
+    report: no
+    by: none
+  new_importations:
+    report: no
+    by: none
+  currently_infected:
+    report: yes
+    by: none
+  currently_infectious:
+    report: no
+    by: none
+  currently_symptomatic:
+    report: yes
+    by: none
+  currently_isolated:
+    report: no
+    by: none
+  # n_vaccinated:
+  #   report: no
+  #   by: priority_group
+  # total_vaccinated:
+  #   report: yes
+  #   by: priority_group
+  # vaccine_coverage:
+  #   report: yes
+  #   by: priority_group
+  # vaccine_coverage_pop:
+  #   report: no
+  #   by: none
+  # booster_coverage:
+  #   report: no
+  #   by: none
+  # booster_coverage_pop:
+  #   report: no
+  #   by: none
+  # booster_coverage_12m:
+  #   report: yes
+  #   by: priority_group
+  # booster_coverage_12m_pop:
+  #   report: no
+  #   by: none
+  # n_doses:
+  #   report: yes
+  #   by: priority_group, vaccine_type, vaccine_doses
+  # total_doses:
+  #   report: yes
+  #   by: priority_group, vaccine_type, vaccine_doses
+  # n_prep:
+  #   report: no
+  #   by: none
+  # total_prep:
+  #   report: yes
+  #   by: none
+  # prep_coverage:
+  #   report: yes
+  #   by: none
+  # prep_coverage_pop:
+  #   report: no
+  #   by: none
+  # n_treat:
+  #   report: no
+  #   by: none
+  # total_treat:
+  #   report: no
+  #   by: none
+  # n_treat_success:
+  #   report: yes
+  #   by: priority_group
+  # total_treat_success:
+  #   report: yes
+  #   by: priority_group
+  # treatment_coverage:
+  #   report: no  # Available soon!
+  #   by: none
+  # treatment_coverage_pop:
+  #   report: no  # Available soon!
+  #   by: none
+  natural_deaths:
+    report: no
+    by: age
+  births:
+    report: yes
+  pop_age:
+    report: yes
+  n_infections:
+    report: yes
+  # variant_prevalence:
+  #   report: yes
+  seroprevalence:
+    report: yes
+  pop_susceptibility:
+    report: yes
+  pop_prevalence:
+    report: no
+  seasonality:
+    report: yes
+  contact_reduction:
+    report: no
+  healthcare_costs:
+    report: no
+  intervention_costs:
+    report: no
+  overall_costs:
+    report: yes
+
+# ---- Calibration settings ----
+
+# Define parameters to be calibrated
+calibration_parameters:
+- param: "beta"
+  lower: 0.0001
+  upper: 0.2
+  prior_fn:
+    fn: "dnorm"
+    mean: 0.05
+    sd: 0.01
+  prior_weight: 1.0
+  global: yes  # yes := only one parameter for all countries; no := country-specific
+  # hyper: yes  # Only relevant if NOT a global parameter
+  synth: 0.1  # Used for generating synthetic data (to test fitting algorithm)
+  
+# Define key calibration options
+calibration_options:
+  data_source: "rsvglobal"
+  data_start: 2014-01-01
+  data_end: 2023-01-01
+  data_burn_in: 30  # Number of days to simulate before data kicks in
+  country_pop: 100000  # TODO: This should be loaded for each country (use WPP)
+  synthetic_data: no
+  synthetic_period: "week"  # Model output summed over this period
+  synthetic_offset: 0.05  # Standard deviation for offseting synthetically generated data
+
+# Weights for epi_data calibration only (set metrics to 0 to turn off)
+calibration_weights:
+  time: "none"  # OPTIONS: 'none', 'weak', 'strong', 'exponential'
+  peak: "none"  # OPTIONS: 'none', 'weak', 'strong'
+  metric:
+    confirmed: 0.0
+    hospital_admissions: 1.0
+    hospital_beds: 0.0
+    # icu_admissions: 1.0
+    # icu_beds: 0.0
+    deaths: 0.0
+    
+# Country data to calibrate with
+data_countries:
+- "DEU"
+- "FRA"
+
+# Strength of objective function scaling
+objective_scaling: "none"  # OPTIONS: 'none', 'weak', or 'strong'
+
+# Emulator options
+emulator:
+  init_samples: 200       # Initial number of paramter sets
+  seeds: 4                # Number of stochastic runs per sample
+  test_train_split: 0.15  # Test-train split of samples (15-20% is reasonable)
+  gp_kernel: "Matern5_2"  # Select GP kernel function (see ?mleHetGP)
+  gp_max_iter: 1000       # Maximum number of iterations of GP algorithm
+
+# Adaptive sampling options
+adaptive_sampling:
+  rounds: 0                   # Number of rounds (set to 0 to turn adaptive sampling off)
+  acquisition_points: 10000   # Number of randomly sampled points to evaluate for resampling
+  min_value_accepted: 0.0001  # Lower bound for expected improvment we'll consider
+  max_samples_accepted: 100   # Take at maximum n new parameter sets per round
+
+# Optimisation options (for finding global minimum of emulated space)
+optimisation:
+  optim_runs: 20  # Number of times to perform optimisation
+  optim_iters: 100  # Number of ASD iterations
+
+# ---- Scenarios ----
+
+# Number of LHC scenario samples to run (if applicable)
+# scenario_lhc_samples: 100
+
+# LHC scenario endpoints to fit to (if applicable)
+# scenario_lhc_endpoints:
+# - id: total_infections
+#   metric: "all_new_infections"
+#   summarise: "sum"  # OPTIONS: sum, mean, min, max
+
+# Always run a baseline scenario
+scenarios:
+- id: baseline
+  name: "Baseline scenario"
+

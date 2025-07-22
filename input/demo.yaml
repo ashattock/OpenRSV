@@ -1,0 +1,19 @@
+---
+
+# Example analysis file to run a demo OpenRSV analysis
+
+# Number of days to simulate
+n_days: 760
+
+# Number of people to simulate
+population_size: 10000
+
+# Proportion of population previously infected
+previously_infected: 0.02
+
+# An alternative scenario
+# scenarios:
+# - id: npi_effect
+#   name: "Minor NPI implementation"
+#   npi_effect: 0.1
+
