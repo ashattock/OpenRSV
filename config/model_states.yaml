@@ -1,0 +1,91 @@
+---
+
+# Define all model state flows
+state_flows:
+
+# ---- New infections ----
+
+# Susceptible -> latent
+- disease_state: susc
+  prognosis_state: none
+  next_disease: latent
+  next_duration: "latency_phase"
+  
+# ---- Post latent phase ----
+
+# Asymptomatic case
+- disease_state: latent
+  prognosis_state: asym
+  next_disease: asym
+  next_duration: "asymptomatic_case"
+  
+# Mild case
+- disease_state: latent
+  prognosis_state: mild
+  next_disease: mild
+  next_duration: "mild_case"
+  
+# Eventual hospital case
+- disease_state: latent
+  prognosis_state: hosp
+  next_disease: mild
+  next_duration: "onset_to_hospital"
+  
+# Eventual death
+- disease_state: latent
+  prognosis_state: dead
+  next_disease: mild
+  next_duration: "onset_to_hospital"
+  
+# ---- Recovery of non-severe cases ----
+
+# Recovery of asymptomatic case
+- disease_state: asym
+  prognosis_state: asym
+  next_disease: susc
+  metric: "recovered"
+
+# Recovery of mild case
+- disease_state: mild
+  prognosis_state: mild
+  next_disease: susc
+  metric: "recovered"
+  
+# ---- Hopsital admissions ----
+
+# For those that will recover
+- disease_state: mild
+  prognosis_state: hosp
+  next_disease: hosp
+  next_duration: "hospital_stay_recover"
+  metric: "hospital_admissions"
+  
+# For those that won't
+- disease_state: mild
+  prognosis_state: dead
+  next_disease: hosp
+  next_duration: "hospital_stay_death"
+  metric: "hospital_admissions"
+  
+# ---- Hopsital recovery/death ----
+
+# Recovery of hospital case
+- disease_state: hosp
+  prognosis_state: hosp
+  next_disease: susc
+  metric: "recovered"
+  
+# Death of hospital case
+- disease_state: hosp
+  prognosis_state: dead
+  next_disease: dead
+  metric: "deaths"
+  
+# ---- Replace dead with new susceptibles ----
+
+# Dead -> susceptible
+- disease_state: dead
+  prognosis_state: dead
+  next_disease: susc
+  metric: "recovered" # TODO: Should this line be removed?? :/
+
