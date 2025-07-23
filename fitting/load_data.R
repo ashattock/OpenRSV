@@ -10,12 +10,12 @@
 # ---------------------------------------------------------
 # Parent function for extracting relevant fitting data
 # ---------------------------------------------------------
-load_data = function(o, fit, synthetic = NULL) {
+load_data = function(fit, synthetic = NULL) {
   
   # TODO: Add feature to pull data from API / github
   
   # Load epi data regardless of what we're fititng to
-  fit = load_epi(o, fit, synthetic)
+  fit = load_epi(fit, synthetic)
   
   # Quick plot of fitting data
   # g = ggplot(fit$data) +
@@ -34,7 +34,7 @@ load_data = function(o, fit, synthetic = NULL) {
 # ---------------------------------------------------------
 # Load emperical epidemiological data from source (or generate synthetic data)
 # ---------------------------------------------------------
-load_epi = function(o, fit, synthetic) {
+load_epi = function(fit, synthetic) {
   
   # All dates we're interested in
   fit$opts$dates = get_data_dates(fit$opts)
@@ -43,7 +43,7 @@ load_epi = function(o, fit, synthetic) {
   #
   # NOTE: This is used to test/debug calibration process
   if (fit$opts$synthetic_data == TRUE) {
-    fit$data = load_synthetic(o, fit$opts, synthetic)
+    fit$data = load_synthetic(fit$opts, synthetic)
     
     # We're done, return out early
     return(fit)
@@ -100,7 +100,7 @@ load_epi = function(o, fit, synthetic) {
 # ---------------------------------------------------------
 # Load synthetic data (and generate it if it doesn't already exist)
 # ---------------------------------------------------------
-load_synthetic = function(o, opts, synthetic) {
+load_synthetic = function(opts, synthetic) {
   
   # File name to save data to / load data from
   save_file = paste0(o$pth$fitting, "synthetic_data.rds")
@@ -118,7 +118,7 @@ load_synthetic = function(o, opts, synthetic) {
     message(" - Generating synthetic data")
     
     # Create new synthetic data by running the model
-    fit_data = generate_synthetic(o, opts, synthetic)
+    fit_data = generate_synthetic(opts, synthetic)
     
     # Save this file for potential later re-use
     saveRDS(fit_data, file = save_file)
@@ -130,7 +130,7 @@ load_synthetic = function(o, opts, synthetic) {
 # ---------------------------------------------------------
 # Generate synthetic data by running the model
 # ---------------------------------------------------------
-generate_synthetic = function(o, opts, synthetic) {
+generate_synthetic = function(opts, synthetic) {
   
   # Check input is provided and is in list format
   if (!is.list(synthetic) || length(synthetic) == 0)
@@ -140,7 +140,7 @@ generate_synthetic = function(o, opts, synthetic) {
   fit_list = c(synthetic, .perform_fit = TRUE)
   
   # Run model with these pre-defined parameters (see model.R)
-  result = model(o, "baseline", seed = 1, fit = fit_list, verbose = "bar")
+  result = model("baseline", seed = 1, fit = fit_list, verbose = "bar")
   
   # Extract model outcomes & offset with some noise - this is what we'll fit to
   fit_data = result$output %>%
@@ -188,7 +188,7 @@ get_data_dates = function(opts) {
 # ---------------------------------------------------------
 # Pull OSI data from API endpoint and save in data cache
 # ---------------------------------------------------------
-pull_osi = function(o, y) {
+pull_osi = function(y) {
   
   message("  > Pulling OSI data")
   

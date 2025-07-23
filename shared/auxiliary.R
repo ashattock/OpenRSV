@@ -28,7 +28,7 @@ as_named_dt = function(x, new_names) {
 # ---------------------------------------------------------
 # Check if user is currently running any cluster jobs
 # ---------------------------------------------------------
-check_cluster_jobs = function(o, action = "error") {
+check_cluster_jobs = function(action = "error") {
   
   # Check number of running and pending jobs
   n_jobs = n_slurm_jobs(user = o$user)
@@ -395,13 +395,13 @@ str2vec = function(x, v) {
 # ---------------------------------------------------------
 # Submit jobs to the cluster and wait until they are complete
 # ---------------------------------------------------------
-submit_cluster_jobs = function(o, n_jobs, bash_file, ...) {
+submit_cluster_jobs = function(n_jobs, bash_file, ...) {
   
   # Skip if no jobs to run
   if (n_jobs > 0) {
     
     # Check if user is currently running any cluster jobs (see auxiliary.R)
-    # check_cluster_jobs(o, action = o$cluster_conflict_action)
+    # check_cluster_jobs(action = o$cluster_conflict_action)
     
     # Create a new log file for the cluster jobs (see auxiliary.R)
     log_file = create_bash_log(o$pth$log, log = o$log_file, err = o$err_file)
@@ -429,7 +429,7 @@ submit_cluster_jobs = function(o, n_jobs, bash_file, ...) {
     system(sys_command)
     
     # Wait for all cluster jobs to complete (see auxiliary.R)
-    wait_for_jobs(o, log_file, n_jobs)
+    wait_for_jobs(log_file, n_jobs)
   }
 }
 
@@ -512,7 +512,7 @@ unlist_format = function(x, sep = "$", ...) {
 # ---------------------------------------------------------
 # Wait until all cluster jobs have finished
 # ---------------------------------------------------------
-wait_for_jobs = function(o, log_file, n_lines, 
+wait_for_jobs = function(log_file, n_lines, 
                          wait_time = 1, pause_time = 5) {
   
   # Wait for log file to be created

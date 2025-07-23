@@ -8,7 +8,7 @@
 # ---------------------------------------------------------
 # Store uncertainty parameters in seperate list, denoted u
 # ---------------------------------------------------------
-parse_uncertainty = function(o, y, u = NULL) {
+parse_uncertainty = function(y, u = NULL) {
   
   # Initiate u list if it doesn't current exist
   if (is.null(u)) u = list()
@@ -40,10 +40,10 @@ parse_uncertainty = function(o, y, u = NULL) {
 # ---------------------------------------------------------
 # Sample points across parameter uncertainty space
 # ---------------------------------------------------------
-sample_uncertainty = function(o) {
+sample_uncertainty = function() {
   
   # Extract all parameters we want to generate uncertainty for
-  u = parse_yaml(o, "all", uncert = "*read*")
+  u = parse_yaml("all", uncert = "*read*")
   
   # Return out if empty
   if (is_empty(u))
@@ -91,10 +91,10 @@ sample_uncertainty = function(o) {
 # ---------------------------------------------------------
 # Sample single average value from uncertainty distribution(s)
 # ---------------------------------------------------------
-sample_average = function(o, average_fn = "median") {
+sample_average = function(average_fn = "median") {
   
   # Extract all parameters for which uncertainty has been defined
-  u = parse_yaml(o, "all", uncert = "*read*")
+  u = parse_yaml("all", uncert = "*read*")
   
   # Return out if empty
   if (is_empty(u))

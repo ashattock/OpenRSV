@@ -9,7 +9,7 @@
 # ---------------------------------------------------------
 # Parent function for running scenarios
 # ---------------------------------------------------------
-run_scenarios = function(o) {
+run_scenarios = function() {
   
   # Only continue if specified by do_step
   if (!is.element(2, o$do_step)) return()
@@ -17,10 +17,10 @@ run_scenarios = function(o) {
   message("* Running all scenarios")
   
   # Check calibration file is suitable
-  # check_fit(o)
+  # check_fit()
   
   # Create and read scenarios to simulate (see parse_input.R)
-  all_scenarios = names(parse_yaml(o, "*create*", read_array = TRUE))
+  all_scenarios = names(parse_yaml("*create*", read_array = TRUE))
   
   # ---- Set up full set of simulations ----
   
@@ -29,10 +29,10 @@ run_scenarios = function(o) {
     set.seed(1)
   
   # Sample values from all parameter uncertianty distrubutions
-  uncert_df = sample_uncertainty(o)  # See uncertainty.R
+  uncert_df = sample_uncertainty()  # See uncertainty.R
   
   # Generate set of sim IDs (depends on uncertainty options)
-  sim_df = create_sim_id(o, uncert_df, all_scenarios)
+  sim_df = create_sim_id(uncert_df, all_scenarios)
   
   # Save to file for use on the cluster
   saveRDS(sim_df, file = paste0(o$pth$simulations, "all_simulations.rds"))
@@ -40,13 +40,13 @@ run_scenarios = function(o) {
   # ---- Simulate on the cluster ----
   
   # We may not want/need to run them all
-  n_simulations = check_existing(o, sim_df)
+  n_simulations = check_existing(sim_df)
   
   # Do we need to simulate at all?
   if (n_simulations > 0) {
     
     # Submit all jobs to the cluster (see auxiliary.R)
-    submit_cluster_jobs(o, n_simulations, "submit.sh", "scenarios")
+    submit_cluster_jobs(n_simulations, "submit.sh", "scenarios")
     
     # Throw an error if any cluster jobs failed (see auxiliary.R)
     stop_if_errors(o$pth$log, o$err_file, err_tol = 1)
@@ -79,7 +79,7 @@ run_scenarios = function(o) {
   n_jobs = length(unique(sim_df$scenario))
   
   # Submit all summarising jobs to the cluster (see auxiliary.R)
-  submit_cluster_jobs(o, n_jobs, "submit.sh", "summarise")
+  submit_cluster_jobs(n_jobs, "submit.sh", "summarise")
   
   # Throw an error if any cluster jobs failed (see auxiliary.R)
   stop_if_errors(o$pth$log, o$err_file)
@@ -99,7 +99,7 @@ run_scenarios = function(o) {
 # ---------------------------------------------------------
 # Generate set of sim IDs (depends on uncertainty options)
 # ---------------------------------------------------------
-create_sim_id = function(o, uncert_df, all_scenarios) {
+create_sim_id = function(uncert_df, all_scenarios) {
   
   # Check we have a positive number of samples to generate
   if (o$n_parameter_sets < 1)
@@ -160,17 +160,17 @@ create_sim_id = function(o, uncert_df, all_scenarios) {
 # ---------------------------------------------------------
 # Check that calibration is still suitable
 # ---------------------------------------------------------
-check_fit = function(o) {
+check_fit = function() {
   
   # Load fitting result file
-  fit_result = load_calibration(o)
+  fit_result = load_calibration()
   
   # For quick results, user can choose to skip this check
   if (o$check_fit_consistency == FALSE)
     return()
   
   # Load current baseline - we need to check input hasn't changed
-  baseline = parse_yaml(o, scenario = "baseline")
+  baseline = parse_yaml(scenario = "baseline")
   
   # Remove items that it is ok to change (see o$fit_changeable_items)
   fit_input = list.remove(fit_result$input, o$fit_changeable_items)
@@ -222,7 +222,7 @@ check_fit = function(o) {
 # ---------------------------------------------------------
 # Check if we can avoid rerunning any existing simulations
 # ---------------------------------------------------------
-check_existing = function(o, sim_df) {
+check_existing = function(sim_df) {
   
   # Start by assuming we'll need to rerun everything
   run_df  = sim_df
@@ -243,7 +243,7 @@ check_existing = function(o, sim_df) {
       message("  > Checking consistency of YAML files")
       
       # Load fitted parameters - we'll need to rerun if these have changed
-      fit_best = load_calibration(o)$best
+      fit_best = load_calibration()$best
       
       # Assess each scenario that already exists
       for (scenario_exist in unique(sims_exist$scenario)) {
@@ -253,7 +253,7 @@ check_existing = function(o, sim_df) {
         check_input = try_load(o$pth$simulations, check_sim$sim_id)$input
         
         # How the input looks now - direct from the current yaml
-        test_input = parse_yaml(o, scenario_exist, read_array = TRUE)$parsed
+        test_input = parse_yaml(scenario_exist, read_array = TRUE)$parsed
         
         # Apply calibrated parameters - important that these are the same
         test_input[names(fit_best)] = fit_best
@@ -297,12 +297,12 @@ check_existing = function(o, sim_df) {
 # ---------------------------------------------------------
 # Wrapper function for reading scenario IDs
 # ---------------------------------------------------------
-get_scenario_ids = function(o, names = TRUE, baseline = TRUE, array = FALSE) {
+get_scenario_ids = function(names = TRUE, baseline = TRUE, array = FALSE) {
   
   # Read scenario IDs with special use case of parse_yaml
   #
   # NOTE: Can also be used to read children of any grid arrays
-  scenario_ids = parse_yaml(o, "*read*", read_array = array)
+  scenario_ids = parse_yaml("*read*", read_array = array)
   
   # Remove baseline entry if requested
   if (baseline == FALSE)

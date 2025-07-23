@@ -8,10 +8,10 @@
 # ---------------------------------------------------------
 # Plot metrics over time for multiple metrics, groups, and/or scenarios
 # ---------------------------------------------------------
-plot_temporal = function(o, fig_name, ...) {
+plot_temporal = function(fig_name, ...) {
   
   # Collate and interpret inputs so we know what to plot
-  list[f, baseline] = fig_properties(o, list(...))
+  list[f, baseline] = fig_properties(list(...))
   
   # If nothing to plot, return out
   if (f$n_metrics == 0)
@@ -35,7 +35,7 @@ plot_temporal = function(o, fig_name, ...) {
     }
     
     # Format model output and store in list to be concatenated
-    plot_list[[scenario]] = format_results(o, f, result)  # See postprocess.R
+    plot_list[[scenario]] = format_results(f, result)  # See postprocess.R
   }
   
   # Normal use case is to reverse scenarios (so baseline is on top)
@@ -132,7 +132,7 @@ plot_temporal = function(o, fig_name, ...) {
   warning("Remove Re calculations")
   
   # Load fitting details - epi data / Re target contained within
-  fit = load_calibration(o, throw_error = FALSE)
+  fit = load_calibration(throw_error = FALSE)
   
   # Check whether fitting has used any epi data
   if (f$fit_target && is.data.table(fit$data)) {
@@ -315,11 +315,11 @@ plot_temporal = function(o, fig_name, ...) {
   
   # Do not save figure if input is trivial  
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   # Save plotting dataframe only if specifically requested
   if (f$save_dataframe == TRUE)
-    save_dataframe(o, plot_df, fig_name)
+    save_dataframe(plot_df, fig_name)
   
   return(g)
 }
@@ -327,13 +327,13 @@ plot_temporal = function(o, fig_name, ...) {
 # ---------------------------------------------------------
 # Plot metrics over time for multiple metrics, groups, and/or scenarios
 # ---------------------------------------------------------
-plot_impact = function(o, fig_name, ...) {
+plot_impact = function(fig_name, ...) {
   
   # Collate key word arguments and override geom
   args = list_modify(list(...), plot_geom = "bar")
   
   # Collate and interpret inputs so we know what to plot
-  list[f, baseline] = fig_properties(o, args)
+  list[f, baseline] = fig_properties(args)
   
   # If nothing to plot, return out
   if (f$n_metrics == 0)
@@ -361,7 +361,7 @@ plot_impact = function(o, fig_name, ...) {
     }
     
     # Format model output and store in list to be concatenated
-    plot_list[[scenario]] = format_results(o, f, result)  # See postprocess.R
+    plot_list[[scenario]] = format_results(f, result)  # See postprocess.R
   }
   
   # ---- Summarise results ----
@@ -583,11 +583,11 @@ plot_impact = function(o, fig_name, ...) {
   
   # Do not save figure if input is trivial  
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   # Save plotting dataframe only if specifically requested
   if (f$save_dataframe == TRUE)
-    save_dataframe(o, plot_df, fig_name)
+    save_dataframe(plot_df, fig_name)
   
   return(g)
 } 
@@ -595,7 +595,7 @@ plot_impact = function(o, fig_name, ...) {
 # ---------------------------------------------------------
 # Plot heat maps for multi-dimensional array scenarios
 # ---------------------------------------------------------
-plot_heatmap = function(o, fig_name, ...) {
+plot_heatmap = function(fig_name, ...) {
   
   # TODO: Do we need to restrict this type of plot to grid only? Or can LHC also be used here?
   
@@ -603,7 +603,7 @@ plot_heatmap = function(o, fig_name, ...) {
   args = list_modify(list(...), plot_geom = "tile", override_colours = NA)
   
   # Collate and interpret inputs so we know what to plot
-  list[f, baseline] = fig_properties(o, args)
+  list[f, baseline] = fig_properties(args)
   
   # If nothing to plot, return out
   if (f$n_metrics == 0)
@@ -727,7 +727,7 @@ plot_heatmap = function(o, fig_name, ...) {
       } else {  # Otherwise continue...
         
         # Extract what we need (see postprocess.R)
-        result = format_results(o, f, result) %>%
+        result = format_results(f, result) %>%
           mutate(array_type = "primary")
         
         # Store in list to be concatenated
@@ -748,7 +748,7 @@ plot_heatmap = function(o, fig_name, ...) {
         } else {   # Otherwise continue...
           
           # Extract what we need (see postprocess.R)
-          dif_result = format_results(o, f, dif_result) %>%
+          dif_result = format_results(f, dif_result) %>%
             mutate(array_type = "difference")
           
           # Store in list to be concatenated
@@ -1034,7 +1034,7 @@ plot_heatmap = function(o, fig_name, ...) {
   
   # Finally, save this figure to file
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(plot_info)
 } 
@@ -1042,7 +1042,7 @@ plot_heatmap = function(o, fig_name, ...) {
 # ---------------------------------------------------------
 # Plot number of infections for multiple scenarios
 # ---------------------------------------------------------
-plot_num_infections = function(o, fig_name, ...) {
+plot_num_infections = function(fig_name, ...) {
   
   # Collate key word arguments and override several values
   args = list_modify(list(...), 
@@ -1051,7 +1051,7 @@ plot_num_infections = function(o, fig_name, ...) {
                      plot_by      = "infections")
   
   # Collate and interpret inputs so we know what to plot
-  list[f, baseline] = fig_properties(o, args)
+  list[f, baseline] = fig_properties(args)
   
   # If nothing to plot, return out
   if (f$n_metrics == 0)
@@ -1071,7 +1071,7 @@ plot_num_infections = function(o, fig_name, ...) {
     }
     
     # Format model output and store in list to be concatenated
-    plot_list[[scenario]] = format_results(o, f, result)  # See postprocess.R
+    plot_list[[scenario]] = format_results(f, result)  # See postprocess.R
   }
   
   # Extract infection name dictionary
@@ -1170,11 +1170,11 @@ plot_num_infections = function(o, fig_name, ...) {
   
   # Do not save figure if input is trivial  
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   # Save plotting dataframe only if specifically requested
   if (f$save_dataframe == TRUE)
-    save_dataframe(o, plot_df, fig_name)
+    save_dataframe(plot_df, fig_name)
   
   return(g)
 }
@@ -1182,7 +1182,7 @@ plot_num_infections = function(o, fig_name, ...) {
 # ---------------------------------------------------------
 # Plot normalised disease state of population over time
 # ---------------------------------------------------------
-plot_disease_state = function(o, fig_name, p, states) {
+plot_disease_state = function(fig_name, p, states) {
   
   # Convert list to dataframe and remove what we're not interested in
   plot_df = states[p$model_states$disease] %>%
@@ -1212,7 +1212,7 @@ plot_disease_state = function(o, fig_name, p, states) {
   
   # Save figures (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -1220,7 +1220,7 @@ plot_disease_state = function(o, fig_name, p, states) {
 # ---------------------------------------------------------
 # Plot performance of Gaussian process emulators
 # ---------------------------------------------------------
-plot_emulator = function(o, fig_name, round_idx) {
+plot_emulator = function(fig_name, round_idx) {
   
   # Corresponding colour scheme
   train_colours = "brewer::set1"
@@ -1287,7 +1287,7 @@ plot_emulator = function(o, fig_name, round_idx) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name, round_idx)
+    fig_save(g, fig_name, round_idx)
   
   return(g)
 }
@@ -1295,7 +1295,7 @@ plot_emulator = function(o, fig_name, round_idx) {
 # ---------------------------------------------------------
 # Plot optimisation performance and parameter-objective relationship
 # ---------------------------------------------------------
-plot_optimisation = function(o, fig_name, round_idx) {
+plot_optimisation = function(fig_name, round_idx) {
   
   # Optimisation colour
   colour_best = "grey40"
@@ -1423,7 +1423,7 @@ plot_optimisation = function(o, fig_name, round_idx) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name, round_idx)
+    fig_save(g, fig_name, round_idx)
   
   return(g)
 }
@@ -1431,7 +1431,7 @@ plot_optimisation = function(o, fig_name, round_idx) {
 # ---------------------------------------------------------
 # Plot the n best-fitting simulated parameter set samples
 # ---------------------------------------------------------
-plot_best_samples = function(o, fig_name, round_idx) {
+plot_best_samples = function(fig_name, round_idx) {
   
   # Percentage of best parameter sets to plot
   p_sets = c(1, 10, 50, 100)
@@ -1619,7 +1619,7 @@ plot_best_samples = function(o, fig_name, round_idx) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name, round_idx)
+    fig_save(g, fig_name, round_idx)
   
   return(g)
 }
@@ -1627,7 +1627,7 @@ plot_best_samples = function(o, fig_name, round_idx) {
 # ---------------------------------------------------------
 # Plot calibration weight assumptions for metrics, time, and peaks
 # ---------------------------------------------------------
-plot_calibration_weights = function(o, fig_name) {
+plot_calibration_weights = function(fig_name) {
   
   # Load fitting details (from first round is sufficient)
   fit = try_load(o$pth$fitting, "r0_result")
@@ -1685,7 +1685,7 @@ plot_calibration_weights = function(o, fig_name) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -1693,12 +1693,12 @@ plot_calibration_weights = function(o, fig_name) {
 # ---------------------------------------------------------
 # LHC scenario diagnostic plots
 # ---------------------------------------------------------
-plot_lhc_diagnostics = function(o, fig_name, parent) {
+plot_lhc_diagnostics = function(fig_name, parent) {
   
   # ---- Load performance details ----
   
   # Load model parameters, simply to check endpoints
-  input = parse_yaml(o, "baseline")$parsed
+  input = parse_yaml("baseline")$parsed
   
   # IDs of all valid endpoints
   endpoints_id = list2dt(input$scenario_lhc_endpoints)$id
@@ -1741,7 +1741,7 @@ plot_lhc_diagnostics = function(o, fig_name, parent) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g1, fig_name, "Relationships", parent)
+    fig_save(g1, fig_name, "Relationships", parent)
   
   # --- Figure 2: Predictor performance ----
   
@@ -1761,13 +1761,13 @@ plot_lhc_diagnostics = function(o, fig_name, parent) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g2, fig_name, "Performance", parent)
+    fig_save(g2, fig_name, "Performance", parent)
 }
 
 # ---------------------------------------------------------
 # LHC scenario prediction plots
 # ---------------------------------------------------------
-plot_lhc_endpoints = function(o, fig_name, 
+plot_lhc_endpoints = function(fig_name, 
                               endpoint, 
                               parent, 
                               vars, 
@@ -1783,7 +1783,7 @@ plot_lhc_endpoints = function(o, fig_name,
   # ---- Endpoint sanity check ----
   
   # Load model parameters, simply to check endpoints
-  input = parse_yaml(o, "baseline")$parsed
+  input = parse_yaml("baseline")$parsed
   
   # All valid endpoints
   all_endpoints = list2dt(input$scenario_lhc_endpoints)
@@ -2027,13 +2027,13 @@ plot_lhc_endpoints = function(o, fig_name,
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
 }
 
 # ---------------------------------------------------------
 # Plot series of network-related properties
 # ---------------------------------------------------------
-plot_network_properties = function(o, fig_name, model_input, network) {
+plot_network_properties = function(fig_name, model_input, network) {
   
   # Check network is not trivial 
   if (is.null(network)) {
@@ -2186,7 +2186,7 @@ plot_network_properties = function(o, fig_name, model_input, network) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -2194,7 +2194,7 @@ plot_network_properties = function(o, fig_name, model_input, network) {
 # ---------------------------------------------------------
 # Age-structured contact matrix heat maps
 # ---------------------------------------------------------
-plot_contact_matrices = function(o, fig_name, model_input, network) {
+plot_contact_matrices = function(fig_name, model_input, network) {
   
   # Check network is not trivial 
   if (is.null(network)) {
@@ -2304,7 +2304,7 @@ plot_contact_matrices = function(o, fig_name, model_input, network) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -2312,7 +2312,7 @@ plot_contact_matrices = function(o, fig_name, model_input, network) {
 # ---------------------------------------------------------
 # Plot duration distributions 
 # ---------------------------------------------------------
-plot_durations = function(o, fig_name, model_input) {
+plot_durations = function(fig_name, model_input) {
   
   # Number of samples from each distribution
   n_samples = 10000
@@ -2389,7 +2389,7 @@ plot_durations = function(o, fig_name, model_input) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -2397,7 +2397,7 @@ plot_durations = function(o, fig_name, model_input) {
 # ---------------------------------------------------------
 # Viral load profile since day of infection
 # ---------------------------------------------------------
-plot_viral_load = function(o, fig_name, model_input) {
+plot_viral_load = function(fig_name, model_input) {
   
   browser()
   
@@ -2502,7 +2502,7 @@ plot_viral_load = function(o, fig_name, model_input) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -2510,7 +2510,7 @@ plot_viral_load = function(o, fig_name, model_input) {
 # ---------------------------------------------------------
 # Plot vaccine and acquired immunity profiles
 # ---------------------------------------------------------
-plot_immunity_profiles = function(o, fig_name, model_input) {
+plot_immunity_profiles = function(fig_name, model_input) {
   
   # Which vaccines to plot, along with a description
   immunity_dict = c(acquired = "SARS-CoV-2 infection", 
@@ -2625,7 +2625,7 @@ plot_immunity_profiles = function(o, fig_name, model_input) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -2633,7 +2633,7 @@ plot_immunity_profiles = function(o, fig_name, model_input) {
 # ---------------------------------------------------------
 # Plot basic severe disease probabilities by age
 # ---------------------------------------------------------
-plot_severity_age = function(o, fig_name, model_input) {
+plot_severity_age = function(fig_name, model_input) {
   
   # Set colour scheme
   colours = "brewer::accent"
@@ -2688,7 +2688,7 @@ plot_severity_age = function(o, fig_name, model_input) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
   
@@ -2697,7 +2697,7 @@ plot_severity_age = function(o, fig_name, model_input) {
 # ---------------------------------------------------------
 # Plot exposure & dose response effects on disease severity
 # ---------------------------------------------------------
-plot_severity_factors = function(o, fig_name, model_input) {
+plot_severity_factors = function(fig_name, model_input) {
   
   # Dictionary for severe disease states
   state_dict = c(severe = "Severe disease", 
@@ -2765,7 +2765,7 @@ plot_severity_factors = function(o, fig_name, model_input) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -2773,7 +2773,7 @@ plot_severity_factors = function(o, fig_name, model_input) {
 # ---------------------------------------------------------
 # Plot seasonality profile best fit and bounds
 # ---------------------------------------------------------
-plot_seasonality_profile = function(o, fig_name, ..., labels = NULL, colours = NULL) {
+plot_seasonality_profile = function(fig_name, ..., labels = NULL, colours = NULL) {
   
   # WARNING: Currently not handling uncertainty - will just plot the default values
   #          if uncertainty is defined for any seasonality profile parameters
@@ -2889,7 +2889,7 @@ plot_seasonality_profile = function(o, fig_name, ..., labels = NULL, colours = N
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -2897,7 +2897,7 @@ plot_seasonality_profile = function(o, fig_name, ..., labels = NULL, colours = N
 # ---------------------------------------------------------
 # Plot all options for air pollution - susceptibility relationship
 # ---------------------------------------------------------
-plot_pollution_relationships = function(o, fig_name, model_input) {
+plot_pollution_relationships = function(fig_name, model_input) {
   
   # Air pollution levels to evaluate
   x_values = 1 : 20
@@ -2958,7 +2958,7 @@ plot_pollution_relationships = function(o, fig_name, model_input) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -2966,7 +2966,7 @@ plot_pollution_relationships = function(o, fig_name, model_input) {
 # ---------------------------------------------------------
 # Plot parameter uncertainty distributions
 # ---------------------------------------------------------
-plot_uncertainty = function(o, fig_name) {
+plot_uncertainty = function(fig_name) {
   
   # Colour map and palette to use
   colours = "viridis::viridis" 
@@ -3011,7 +3011,7 @@ plot_uncertainty = function(o, fig_name) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
   
   return(g)
 }
@@ -3019,10 +3019,10 @@ plot_uncertainty = function(o, fig_name) {
 # ---------------------------------------------------------
 # Plot historgam of time taken to simulate the model
 # ---------------------------------------------------------
-plot_simulation_time = function(o, fig_name, ...) {
+plot_simulation_time = function(fig_name, ...) {
   
   # Collate and interpret inputs so we know what to plot
-  list[f, baseline] = fig_properties(o, list(...))
+  list[f, baseline] = fig_properties(list(...))
   
   # ---- Extract model details ----
   
@@ -3082,7 +3082,7 @@ plot_simulation_time = function(o, fig_name, ...) {
   
   # Save figure (as long as fig_name is not trivial)
   if (!is.null(fig_name))
-    fig_save(o, g, fig_name)
+    fig_save(g, fig_name)
 }
 
 # ---------------------------------------------------------
@@ -3162,7 +3162,7 @@ apply_colourscale = function(g, f, idx, plot_df) {
 # ---------------------------------------------------------
 # Generate figure properties based on user inputs
 # ---------------------------------------------------------
-fig_properties = function(o, args) {
+fig_properties = function(args) {
   
   # Load defaults and overwrite user-defined items
   p = fig_defaults()
@@ -3171,7 +3171,7 @@ fig_properties = function(o, args) {
   # ---- Load baseline (or alt baseline) file ----
   
   # Scenarios to plot
-  f = fig_scenarios(o, args)
+  f = fig_scenarios(args)
   
   # Handle alternative functionality case - file fed in directly
   if (!is.null(p$plot_file)) baseline = p$plot_file
@@ -3471,7 +3471,7 @@ fig_properties = function(o, args) {
 # ---------------------------------------------------------
 # Determine which scenarios to plot based on user inputs
 # ---------------------------------------------------------
-fig_scenarios = function(o, args) {
+fig_scenarios = function(args) {
   
   # Load default figure properties
   p = fig_defaults()
@@ -3524,11 +3524,11 @@ fig_scenarios = function(o, args) {
   f$n_scenarios = length(f$scenarios)
   
   # Full scenario names as defined in yaml file - try cheaper non-array call
-  f$scenario_names = get_scenario_ids(o, array = FALSE)[f$scenarios]
+  f$scenario_names = get_scenario_ids(array = FALSE)[f$scenarios]
   
   # If these are array scenarios, we'll need the more expensive read_array version of *read*
   if (any(is.na(f$scenario_names)))
-    f$scenario_names = get_scenario_ids(o, array = TRUE)[f$scenarios]
+    f$scenario_names = get_scenario_ids(array = TRUE)[f$scenarios]
   
   # Check if any names are still missing - throw an error if so
   missing_names = f$scenarios[is.na(f$scenario_names)]
@@ -3704,7 +3704,7 @@ fig_defaults = function() {
 # ---------------------------------------------------------
 # Save a ggplot figure to file with default settings
 # ---------------------------------------------------------
-fig_save = function(o, g, ..., path = "results", width = o$save_width, height = o$save_height) {
+fig_save = function(g, ..., path = "results", width = o$save_width, height = o$save_height) {
   
   # Collapse inputs into vector of strings
   fig_name_parts = unlist(list(...))
@@ -3730,7 +3730,7 @@ fig_save = function(o, g, ..., path = "results", width = o$save_width, height = 
 # ---------------------------------------------------------
 # Save a plotting dataframe to file
 # ---------------------------------------------------------
-save_dataframe = function(o, plot_df, fig_name) {
+save_dataframe = function(plot_df, fig_name) {
   
   # Give a generic name if otherwise unnamed figure
   if (is.null(fig_name))

@@ -88,7 +88,7 @@ process_results = function(result, raw_output) {
 # ---------------------------------------------------------
 # Format model outcomes ready for plotting
 # ---------------------------------------------------------
-format_results = function(o, f, results) {
+format_results = function(f, results) {
   
   # Which results df to load depends on cumulative flag
   which_output = ifelse(f$cumulative, "cum_output", "output")
@@ -136,7 +136,7 @@ format_results = function(o, f, results) {
     
     # Plotting by age is a special case - group by age classification
     if (f$plot_by == "age")
-      output_df = group_ages(o, output_df)
+      output_df = group_ages(output_df)
   }
   
   # No grouping - we want to remove all disaggregations
@@ -157,7 +157,7 @@ format_results = function(o, f, results) {
 # ---------------------------------------------------------
 # Group by user-defined age classifications
 # ---------------------------------------------------------
-group_ages = function(o, df, summarised = TRUE) {
+group_ages = function(df, summarised = TRUE) {
   
   # Preallocate and bind age group variable to datatable
   age_df = df %>% 

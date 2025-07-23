@@ -9,7 +9,7 @@
 # ---------------------------------------------------------
 # Parent function for operating on array scenarios
 # ---------------------------------------------------------
-run_arrays = function(o) {
+run_arrays = function() {
   
   # Only continue if specified by do_step (or forced)
   if (!is.element(3, o$do_step)) return()
@@ -19,7 +19,7 @@ run_arrays = function(o) {
   # ---- Identify array grid and LHC parents ----
   
   # All individual scenarios
-  all_scenarios = get_scenario_ids(o, array = TRUE, names = FALSE)
+  all_scenarios = get_scenario_ids(array = TRUE, names = FALSE)
   
   # Indentify any parents of these individual scenarios
   all_parents = get_array_parents(all_scenarios)
@@ -29,7 +29,7 @@ run_arrays = function(o) {
     message(" - No array scenarios identified")
   
   # Determine if any parents are LHC scenarisos
-  lhc_vec = is_parent_lhc(o, all_parents)
+  lhc_vec = is_parent_lhc(all_parents)
   
   # Throw an error if type of array could not be established
   unknown_type = all_parents[is.na(lhc_vec)]
@@ -43,23 +43,23 @@ run_arrays = function(o) {
   # ---- Operate on these parents ----
   
   # Train a ML model on parameter inputs and chosen outputs
-  predict_lhc_scenarios(o, all_scenarios, parents_lhc)
+  predict_lhc_scenarios(all_scenarios, parents_lhc)
   
   # Squish outputs of all array children into one datatable
   #
   # NOTE: This makes it much quicker to plot heatmaps
-  summarise_grid_scenarios(o, all_scenarios, parents_grid)
+  summarise_grid_scenarios(all_scenarios, parents_grid)
 }
 
 # ---------------------------------------------------------
 # Train a ML model for all user-defined endpoints
 # ---------------------------------------------------------
-predict_lhc_scenarios = function(o, scenarios, parents) {
+predict_lhc_scenarios = function(scenarios, parents) {
   
   # TODO: Do not repeat for endpoints that have previously been done (unless forced)
   
   # Parse user-defined endpoint and emulator options
-  input = parse_yaml(o, "baseline")$parsed
+  input = parse_yaml("baseline")$parsed
   
   # Extract list of endpoint and associated details
   endpoints = input$scenario_lhc_endpoints
@@ -114,7 +114,7 @@ predict_lhc_scenarios = function(o, scenarios, parents) {
         setDT()
       
       # Train input -> endpoint predictor
-      predictor = train_predictor(o, endpoint_df, array_info, input$emulator)
+      predictor = train_predictor(endpoint_df, array_info, input$emulator)
       
       # Save predictor for this endpoint to file
       saveRDS(predictor, paste0(o$pth$endpoints, parent, ".", e$id, ".rds"))
@@ -125,14 +125,14 @@ predict_lhc_scenarios = function(o, scenarios, parents) {
     message("  > Plotting diagnostics")
     
     # Plot LHC scenario diagnostics
-    plot_lhc_diagnostics(o, "LHC diagnostics", parent)
+    plot_lhc_diagnostics("LHC diagnostics", parent)
   }
 }
 
 # ---------------------------------------------------------
 # Squish outputs of all array children into one datatable
 # ---------------------------------------------------------
-summarise_grid_scenarios = function(o, scenarios, parents) {
+summarise_grid_scenarios = function(scenarios, parents) {
   
   # Loop through all distinct parent array scenarios
   for (parent in parents) {
@@ -153,7 +153,7 @@ summarise_grid_scenarios = function(o, scenarios, parents) {
 # ---------------------------------------------------------
 # Flatten and parse parent array scenarios into their children
 # ---------------------------------------------------------
-parse_array_grid = function(o, y, scenario) {
+parse_array_grid = function(y, scenario) {
   
   # Full names of all scenarios
   scenarios_name = unlist(lapply(y$scenarios, function(x) x$name))
@@ -298,7 +298,7 @@ parse_array_grid = function(o, y, scenario) {
 # ---------------------------------------------------------
 # Generate LHC samples from full set of parameter bounds
 # ---------------------------------------------------------
-parse_array_lhc = function(o, y, scenario) {
+parse_array_lhc = function(y, scenario) {
   
   # Full names of all scenarios
   scenarios_name = unlist(lapply(y$scenarios, function(x) x$name))
@@ -535,7 +535,7 @@ get_array_parents = function(scenarios, multidim = FALSE) {
 # ---------------------------------------------------------
 # Test whether array parent is a LHC scenario
 # ---------------------------------------------------------
-is_parent_lhc = function(o, parents) {
+is_parent_lhc = function(parents) {
   
   # Preallocate vector output
   parent_lhc = rep(NA, length(parents))

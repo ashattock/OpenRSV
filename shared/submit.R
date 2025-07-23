@@ -25,7 +25,7 @@ o = set_options()
 
 # Run task defined by job_type for job_id and catch any error
 tryCatch(
-  run_cluster_job(o, job_type, job_id),  # See cluster_jobs.R
+  run_cluster_job(job_type, job_id),  # See cluster_jobs.R
   
   # Error handler
   error = function(e) {

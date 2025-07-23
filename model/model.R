@@ -15,7 +15,7 @@
 # ---------------------------------------------------------
 # Main function: The guts of the model
 # ---------------------------------------------------------
-model = function(o, scenario, seed = NA, fit = NULL, uncert = NULL, do_plot = FALSE, verbose = "day") {
+model = function(scenario, seed = NA, fit = NULL, uncert = NULL, do_plot = FALSE, verbose = "day") {
   
   # Initiate model timer
   tic("model")
@@ -28,7 +28,7 @@ model = function(o, scenario, seed = NA, fit = NULL, uncert = NULL, do_plot = FA
   if (verbose != "none") message(" - Parsing input")
   
   # Load and parse user-defined inputs for this scenario
-  yaml = parse_yaml(o, scenario, fit = fit, uncert = uncert, read_array = TRUE)
+  yaml = parse_yaml(scenario, fit = fit, uncert = uncert, read_array = TRUE)
   
   # Shorthand for model parameters
   p = yaml$parsed
@@ -160,7 +160,7 @@ model = function(o, scenario, seed = NA, fit = NULL, uncert = NULL, do_plot = FA
   
   # Produce plot of disease and care states over time (see plotting.R)
   if (do_plot == TRUE)
-    plot_disease_state(o, "Simulated disease states", p, states)
+    plot_disease_state("Simulated disease states", p, states)
   
   # Calculate healthcare and intervention costs
   m = health_economics(m, p, cost_units)

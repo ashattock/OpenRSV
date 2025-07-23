@@ -27,10 +27,10 @@ run_model_test = function(scenario = "baseline", rerun = TRUE) {
     browser()
     
     # Load calibration result (if it exists) (see calibration.R)
-    fit_list = load_calibration(o, throw_error = FALSE)$best
+    fit_list = load_calibration(throw_error = FALSE)$best
     
     # If uncertainty defined, take the average over the distribution(s)
-    uncert_list = sample_average(o)  # See uncertainty.R
+    uncert_list = sample_average()  # See uncertainty.R
     
     # Run model for the defined scenario (see model.R)
     result = model(
@@ -57,55 +57,55 @@ run_model_test = function(scenario = "baseline", rerun = TRUE) {
 
   # Network figure 1) Series of network-related properties
   fig_name = c("Test simulation", scenario, "Network properties")
-  plot_network_properties(o, fig_name, result$input, result$network)
+  plot_network_properties(fig_name, result$input, result$network)
 
   # Network figure 2) Age matrix of contact density per age
   fig_name = c("Test simulation", scenario, "Contact matrices")
-  plot_contact_matrices(o, fig_name, result$input, result$network)
+  plot_contact_matrices(fig_name, result$input, result$network)
 
   message(" - Plotting epidemiological outcomes")
 
   # Plot all available metrics over time
   fig_name = c("Test simulation", scenario)
-  plot_temporal(o, fig_name, plot_file = result, alt_baseline = scenario)
+  plot_temporal(fig_name, plot_file = result, alt_baseline = scenario)
 
   # Plot all metrics in cumulative form
   fig_name = c("Test simulation", scenario, "Cumulative")
-  plot_temporal(o, fig_name, plot_file = result, alt_baseline = scenario,
+  plot_temporal(fig_name, plot_file = result, alt_baseline = scenario,
                 cumulative = TRUE)
 
   # Plot metrics by variant
   # fig_name = c("Test simulation", scenario, "Variants")
-  # plot_temporal(o, fig_name, plot_file = result, alt_baseline = scenario,
+  # plot_temporal(fig_name, plot_file = result, alt_baseline = scenario,
   #               plot_by = "variant")
 
   # Same plot but using stacked areas
   # fig_name = c("Test simulation", scenario, "Variants", "Area")
-  # plot_temporal(o, fig_name, plot_file = result, alt_baseline = scenario,
+  # plot_temporal(fig_name, plot_file = result, alt_baseline = scenario,
   #               plot_by = "variant", plot_geom = "area")
 
   # Plot metrics by age group
   fig_name = c("Test simulation", scenario, "Age")
-  plot_temporal(o, fig_name, plot_file = result, alt_baseline = scenario,
+  plot_temporal(fig_name, plot_file = result, alt_baseline = scenario,
                 plot_by = "age", plot_geom = "area")
 
   # Plot metrics by priority group
   # fig_name = c("Test simulation", scenario, "Priority groups")
-  # plot_temporal(o, fig_name, plot_file = result, alt_baseline = scenario,
+  # plot_temporal(fig_name, plot_file = result, alt_baseline = scenario,
   #               plot_by = "priority_group", plot_geom = "area")
 
   # Plot metrics by latest vaccine received
   # fig_name = c("Test simulation", scenario, "Vaccine type")
-  # plot_temporal(o, fig_name, plot_file = result, alt_baseline = scenario,
+  # plot_temporal(fig_name, plot_file = result, alt_baseline = scenario,
   #               plot_by = "vaccine_type", plot_geom = "area")
 
   # Plot metrics by number of vaccine doses received
   # fig_name = c("Test simulation", scenario, "Vaccine doses")
-  # plot_temporal(o, fig_name, plot_file = result, alt_baseline = scenario,
+  # plot_temporal(fig_name, plot_file = result, alt_baseline = scenario,
   #               plot_by = "vaccine_doses", plot_geom = "area")
 
   # Histogram of number of infections per person
   fig_name = c("Test simulation", scenario, "Number of infections")
-  plot_num_infections(o, fig_name, plot_file = result, alt_baseline = scenario)
+  plot_num_infections(fig_name, plot_file = result, alt_baseline = scenario)
 }
 

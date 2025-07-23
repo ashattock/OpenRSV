@@ -16,7 +16,7 @@
 # ---------------------------------------------------------
 # Train a model emulator on simulated samples
 # ---------------------------------------------------------
-train_emulator = function(o, fit, r_idx) {
+train_emulator = function(fit, r_idx) {
   
   message("  > Training model emulator")
   
@@ -96,7 +96,7 @@ train_emulator = function(o, fit, r_idx) {
 # ---------------------------------------------------------
 # Find global minimum of emulated space
 # ---------------------------------------------------------
-search_emulator = function(o, fit, r_idx) {
+search_emulator = function(fit, r_idx) {
   
   message("  > Searching emulated space")
   
@@ -181,7 +181,7 @@ evaluate_emulator = function(x, args) {
 # ---------------------------------------------------------
 # Train parameter input -> model output
 # ---------------------------------------------------------
-train_predictor = function(o, data, info, opts) {
+train_predictor = function(data, info, opts) {
   
   # Shorthand for predictor variables
   params = info$vars$variable_id

@@ -12,7 +12,7 @@
 # ---------------------------------------------------------
 # Parent function for model calibration process
 # ---------------------------------------------------------
-run_calibration = function(o) {
+run_calibration = function() {
   
   # Only continue if specified by do_step
   if (!is.element(1, o$do_step)) return()
@@ -22,12 +22,12 @@ run_calibration = function(o) {
   # ---- Load input and data ----
   
   # Initiate fit list and perform a few checks on input yaml
-  fit = setup_calibration(o)
+  fit = setup_calibration()
   
   browser()
   
   # Load data (see load_data.R)
-  fit = load_data(o, fit, fit$synthetic)
+  fit = load_data(fit, fit$synthetic)
   
   # ---- Main adaptive sampling loop ----
   
@@ -41,7 +41,7 @@ run_calibration = function(o) {
       set.seed(r_val)
     
     # Sample parameter sets for this sampling round
-    param_ids = sample_parameters(o, fit, r_val)
+    param_ids = sample_parameters(fit, r_val)
     
     # Break out of adaptive sampling if no more decent samples to simulate
     if (length(param_ids) == 0)
@@ -53,44 +53,44 @@ run_calibration = function(o) {
     browser()
     
     # Simulate these parameter samples
-    simulate_parameters(o, r_idx, param_ids)
+    simulate_parameters(r_idx, param_ids)
     
     # Calculate quality of fit
-    quality_of_fit(o, fit, r_idx)
+    quality_of_fit(fit, r_idx)
     
     browser()
     
     # Select all parameter sets that we'll use to train the emulator
-    select_samples(o, r_val)
+    select_samples(r_val)
     
     # Train model emulator (see emulator.R)
-    train_emulator(o, fit, r_idx)
+    train_emulator(fit, r_idx)
     
     # Find global minimum of emulated space (see emulator.R)
-    search_emulator(o, fit, r_idx)
+    search_emulator(fit, r_idx)
     
     message("  > Plotting performance")
     
     # Performance plots (see plotting.R)
-    plot_best_samples(o, "Best simulated samples",   r_idx)
-    plot_emulator(o,     "Emulator performance",     r_idx)
-    plot_optimisation(o, "Optimisation performance", r_idx)
+    plot_best_samples("Best simulated samples", r_idx)
+    plot_emulator("Emulator performance", r_idx)
+    plot_optimisation("Optimisation performance", r_idx)
   }
   
   # Also plot calibration weight assumptions (only need do this once)
-  plot_calibration_weights(o, "Calibration weights")
+  plot_calibration_weights("Calibration weights")
   
   # Save final result
-  save_calibration(o, r_idx)
+  save_calibration(r_idx)
 }
 
 # ---------------------------------------------------------
 # Initiate fit list and perform a few checks on input yaml
 # ---------------------------------------------------------
-setup_calibration = function(o) {
+setup_calibration = function() {
   
   # Load parsed parameters from yaml file
-  p = parse_yaml(o, scenario = "baseline")$parsed
+  p = parse_yaml(scenario = "baseline")$parsed
   
   # Shorthand for calibration options
   opts = p$calibration_options
@@ -223,7 +223,7 @@ setup_calibration = function(o) {
 # ---------------------------------------------------------
 # Save final file with both 'emulated' and 'simulated' best params
 # ---------------------------------------------------------
-save_calibration = function(o, rx_idx) {
+save_calibration = function(rx_idx) {
   
   # Load result of final adaptive sampling round
   rx_fit = try_load(o$pth$fitting, paste0(rx_idx, "_result"))
@@ -266,7 +266,7 @@ save_calibration = function(o, rx_idx) {
 # ---------------------------------------------------------
 # Load final fit file and select 'best' parameter set
 # ---------------------------------------------------------
-load_calibration = function(o, ...) {
+load_calibration = function(...) {
   
   # Load model fitting result - throw an error if it doesn't exist
   err_msg = "Cannot find a fitting file for this analysis - have you run step 1?"
@@ -281,7 +281,7 @@ load_calibration = function(o, ...) {
 # ---------------------------------------------------------
 # Generate a set of parameter sets to simulate
 # ---------------------------------------------------------
-sample_parameters = function(o, fit, r_val) {
+sample_parameters = function(fit, r_val) {
   
   message("  > Sampling parameters")
   
@@ -362,7 +362,7 @@ sample_parameters = function(o, fit, r_val) {
 # ---------------------------------------------------------
 # Simulate newly-generated parameter sets (uses the cluster)
 # ---------------------------------------------------------
-simulate_parameters = function(o, r_idx, param_ids) {
+simulate_parameters = function(r_idx, param_ids) {
   
   # Full path to all output files to be produced
   output_files = paste0(o$pth$fit_samples, param_ids, ".rds")
@@ -387,7 +387,7 @@ simulate_parameters = function(o, r_idx, param_ids) {
     job_type = paste0("fitting::", r_idx)
     
     # Submit all jobs to the cluster (see auxiliary.R)
-    submit_cluster_jobs(o, n_simulations, "submit.sh", job_type)
+    submit_cluster_jobs(n_simulations, "submit.sh", job_type)
     
     # Throw an error if any cluster jobs failed (see auxiliary.R)
     err_tol = floor(n_simulations * o$sample_err_tol)
@@ -416,7 +416,7 @@ simulate_parameters = function(o, r_idx, param_ids) {
 # ---------------------------------------------------------
 # Calculate how well model output matches the fitting target
 # ---------------------------------------------------------
-quality_of_fit = function(o, fit, r_idx, do_plot = FALSE) {
+quality_of_fit = function(fit, r_idx, do_plot = FALSE) {
   
   message("  > Calculating quality of fit")
   
@@ -511,7 +511,7 @@ quality_of_fit = function(o, fit, r_idx, do_plot = FALSE) {
 # ---------------------------------------------------------
 # Select all parameter sets that we'll use to train an emulator
 # ---------------------------------------------------------
-select_samples = function(o, r_val) {
+select_samples = function(r_val) {
   
   # NOTE: At the moment this is a pretty trivial function, but could
   #       be used to filter out unlikely regions of parameter space

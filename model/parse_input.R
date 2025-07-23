@@ -12,7 +12,7 @@
 # ---------------------------------------------------------
 # Read yaml input file and perform some additional parsing
 # ---------------------------------------------------------
-parse_yaml = function(o, scenario, fit = NULL, uncert = NULL, read_array = FALSE) {
+parse_yaml = function(scenario, fit = NULL, uncert = NULL, read_array = FALSE) {
   
   # NOTE: The initial parsing work is done by read_yaml from yaml package
   
@@ -50,7 +50,7 @@ parse_yaml = function(o, scenario, fit = NULL, uncert = NULL, read_array = FALSE
   # Apply values for specified scenario
   #
   # NOTE: Some general checks on the content of all scenarios are perfomed here
-  y = parse_scenarios(o, y, scenario, read_array)
+  y = parse_scenarios(y, scenario, read_array)
   
   # If we only need to read scenario names, return out here with named vector
   if (scenario %in% c("*read*", "*create*"))
@@ -392,7 +392,7 @@ parse_yaml = function(o, scenario, fit = NULL, uncert = NULL, read_array = FALSE
 
     # Check there is internet connection before pulling for API
     # if (curl::has_internet())
-    try(pull_osi(o, y), silent = TRUE)
+    try(pull_osi(y), silent = TRUE)
 
     # If running on the cluster we'll need to load from cache
     # if (!curl::has_internet())
@@ -676,10 +676,10 @@ parse_yaml = function(o, scenario, fit = NULL, uncert = NULL, read_array = FALSE
   y$model_vars = v
   
   # Disease, care, and prognosis states
-  y = parse_model_states(o, y)
+  y = parse_model_states(y)
   
   # Model metrics to be tracked
-  y = parse_model_metrics(o, y)
+  y = parse_model_metrics(y)
   
   # ---- Model output groupings ----
   
@@ -765,8 +765,8 @@ overwrite_defaults = function(y, y_overwrite) {
   y_overwrite$calibration_parameters = NULL
   
   # Remove uncertainty parameters (we apply these after sampling from distributions)
-  list[y_overwrite, u] = parse_uncertainty(o, y_overwrite)
-  list[y, u]           = parse_uncertainty(o, y, u = u)
+  list[y_overwrite, u] = parse_uncertainty(y_overwrite)
+  list[y, u]           = parse_uncertainty(y, u = u)
   
   # ---- Special case: counties and demography ----
   
@@ -1030,7 +1030,7 @@ parse_fn = function(fn_args, along = NULL, evaluate = TRUE) {
 # ---------------------------------------------------------
 # Parse user-defined scenarios - in a seperate function for readability
 # ---------------------------------------------------------
-parse_scenarios = function(o, y, scenario, read_array) {
+parse_scenarios = function(y, scenario, read_array) {
   
   # Append scenario ID to main y list, simply for reference
   y$.id = scenario
@@ -1045,10 +1045,10 @@ parse_scenarios = function(o, y, scenario, read_array) {
     if (read_array == TRUE) {
       
       # Flatten any array grid scenarios
-      y = parse_array_grid(o, y, scenario)  # See array.R
+      y = parse_array_grid(y, scenario)  # See array.R
       
       # Sample for any array LHC scenarios
-      y = parse_array_lhc(o, y, scenario)  # See array.R
+      y = parse_array_lhc(y, scenario)  # See array.R
     }
     
     # Extract short and long names of all scenarios we've defined
@@ -1112,7 +1112,7 @@ parse_scenarios = function(o, y, scenario, read_array) {
 # ---------------------------------------------------------
 # Parse disease, care, and prognosis states
 # ---------------------------------------------------------
-parse_model_states = function(o, y) {
+parse_model_states = function(y) {
   
   # Load model flows yaml file
   model_flows = read_yaml(o$pth$states)
@@ -1133,7 +1133,7 @@ parse_model_states = function(o, y) {
 # ---------------------------------------------------------
 # Parse model metrics to collate and plot
 # ---------------------------------------------------------
-parse_model_metrics = function(o, y) {
+parse_model_metrics = function(y) {
   
   # Metric definitions
   metrics_def = read_yaml(o$pth$metrics)

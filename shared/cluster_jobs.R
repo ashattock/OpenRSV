@@ -8,7 +8,7 @@
 # ---------------------------------------------------------
 # Perform cluster job of choice (see job_type input)
 # ---------------------------------------------------------
-run_cluster_job = function(o, job_type, task_id) {
+run_cluster_job = function(job_type, task_id) {
   
   # ---- Run fitting samples -----
   
@@ -36,12 +36,12 @@ run_cluster_job = function(o, job_type, task_id) {
     fit_list = list.append(param_list, .perform_fit = TRUE)
     
     # If uncertainty defined, take the average over the distribution(s)
-    uncert_list = sample_average(o)  # See uncertainty.R
+    uncert_list = sample_average()  # See uncertainty.R
     
     message(" - Running model")
     
     # Simulate model with this parameter set
-    result = model(o, "baseline", 
+    result = model("baseline", 
                    seed    = param_df$seed, 
                    fit     = fit_list, 
                    uncert  = uncert_list, 
@@ -89,10 +89,10 @@ run_cluster_job = function(o, job_type, task_id) {
     }
     
     # Loaded fitted model parameters
-    fit_list = NULL # load_calibration(o)$best
+    fit_list = NULL # load_calibration()$best
     
     # Simulate the model for this scenario and this seed (see model.R)
-    result = model(o, this_sim$scenario, 
+    result = model(this_sim$scenario, 
                    seed    = this_sim$seed_num, 
                    fit     = fit_list,
                    uncert  = uncert_list, 
