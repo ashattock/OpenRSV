@@ -5,8 +5,8 @@
 #
 # Any numerical, logical, or character value or vector defined
 # in the main set_options() function can be overridden through
-# the non-mandatory \config\my_options.yaml file. Note that
-# this my_options file is git ignored (indeed, that is the very
+# the non-mandatory \config\options.yaml file. Note that
+# this options yaml file is git ignored (indeed, that is the very
 # point of such a file), so each user will need to create one.
 #
 ###########################################################
@@ -201,7 +201,7 @@ set_options = function(do_step = NA, quiet = FALSE) {
   
   # ---- Override options ----
   
-  # Override options set in my_options file
+  # Override options set in options yaml file
   o = override_options(o, quiet = quiet)
   
   # Display analysis details
@@ -211,13 +211,9 @@ set_options = function(do_step = NA, quiet = FALSE) {
 }
 
 # ---------------------------------------------------------
-# Override options set in my_options file
+# Override options set in options yaml file
 # ---------------------------------------------------------
 override_options = function(o, quiet = FALSE) {
-  
-  # Throw a warning if user still has a my_options.csv file
-  if (file.exists(str_replace(o$pth$my_options, ".yaml$", ".csv")))
-    warning("my_options.csv has been deprecated: use my_options.yaml instead")
   
   # If user has a 'my options' file, load it
   if (file.exists(o$pth$my_options)) {

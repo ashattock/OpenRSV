@@ -39,7 +39,7 @@ set_dirs = function(o) {
   # ---- Set analysis name ----
   
   # User's custom options (may or may not exist)
-  pth$my_options = file.path(pth$config, "my_options.yaml")
+  pth$my_options = file.path(pth$config, "options.yaml")
   
   # If user has a 'my options' file, load it
   if (file.exists(pth$my_options)) {

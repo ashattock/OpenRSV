@@ -7,7 +7,7 @@ core*
 *.RDS
 README.html
 /my_results.R
-config/my_options.yaml
+config/options.yaml
 log/
 cache/
 input/*

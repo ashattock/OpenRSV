@@ -33,8 +33,7 @@ rm(list = ls())
 no_src = c(
   "launch.R", 
   "submit.R",
-  "dependencies.R", 
-  "copy_project.R")
+  "dependencies.R")
 
 # All R files, and those to source
 all_files = list.files(pattern = ".+\\.R$")
