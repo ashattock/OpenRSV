@@ -9,7 +9,7 @@
 # ---------------------------------------------------------
 # Run a single simulation and produce a few standard outputs
 # ---------------------------------------------------------
-run_model_test = function(o, scenario = "baseline", rerun = TRUE) {
+run_model_test = function(scenario = "baseline", rerun = TRUE) {
   
   # Only continue if specified by do_step
   if (!is.element(0, o$do_step)) return()
@@ -24,6 +24,8 @@ run_model_test = function(o, scenario = "baseline", rerun = TRUE) {
   # Check whether we want to simulate (or simply plot a previously created file)
   if (rerun == TRUE || !file.exists(test_file)) {
     
+    browser()
+    
     # Load calibration result (if it exists) (see calibration.R)
     fit_list = load_calibration(o, throw_error = FALSE)$best
     
@@ -31,12 +33,13 @@ run_model_test = function(o, scenario = "baseline", rerun = TRUE) {
     uncert_list = sample_average(o)  # See uncertainty.R
     
     # Run model for the defined scenario (see model.R)
-    result = model(o, scenario,
-                   seed    = 1,
-                   fit     = fit_list,
-                   uncert  = uncert_list,
-                   do_plot = TRUE,
-                   verbose = "bar")
+    result = model(
+      scenario,
+      seed    = 1,
+      fit     = fit_list,
+      uncert  = uncert_list,
+      do_plot = TRUE,
+      verbose = "bar")
     
     # Aggregative and summarise raw model output (see postprocess.R)
     result = process_results(result, result$output)

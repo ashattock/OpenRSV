@@ -29,14 +29,14 @@ rm(list = ls())
 
 # ---- Source files ----
 
-# Scripts that should bot be sourced
+# Scripts that should not be sourced
 no_src = c(
   "launch.R", 
-  "submit.R",
-  "dependencies.R")
+  "config/dependencies.R",
+  "shared/submit.R")
 
 # All R files, and those to source
-all_files = list.files(pattern = ".+\\.R$")
+all_files = list.files(pattern = ".+\\.R$", recursive = TRUE)
 src_files = setdiff(all_files, no_src)
 
 # Source each of these files
