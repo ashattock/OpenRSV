@@ -80,7 +80,7 @@ predict_lhc_scenarios = function(scenarios, parents) {
     input_df = array_info$values %>%
       pivot_wider(id_cols    = scenario, 
                   names_from = variable_id) %>%
-      setDT()
+      as.data.table()
     
     # ---- Load outputs ----
     
@@ -111,7 +111,7 @@ predict_lhc_scenarios = function(scenarios, parents) {
         ungroup() %>%
         full_join(input_df, by = "scenario") %>%
         select(scenario, all_of(array_info$vars$variable_id), value) %>%
-        setDT()
+        as.data.table()
       
       # Train input -> endpoint predictor
       predictor = train_predictor(endpoint_df, array_info, input$emulator)
@@ -230,7 +230,7 @@ parse_array_grid = function(y, scenario) {
                   values_from = val) %>%
       mutate(id = paste0(parent, ".", x)) %>%
       select(id, all_of(array_vars)) %>%
-      setDT()
+      as.data.table()
     
     # Extract full names of all array scenarios
     array_names = vars_df %>%
@@ -274,7 +274,7 @@ parse_array_grid = function(y, scenario) {
         group_by(variable_id) %>%
         slice_head(n = 1) %>%
         ungroup() %>%
-        setDT()
+        as.data.table()
       
       # Dimension details
       dim_df = vars_df[!duplicated(vars_df$dim), .(dim, var)]
@@ -285,7 +285,7 @@ parse_array_grid = function(y, scenario) {
         select(scenario = id, all_of(dim_df$dim)) %>%
         pivot_longer(cols = -scenario, 
                      names_to = "variable_id") %>%
-        setDT()
+        as.data.table()
       
       # Save this info for use when collating all results
       saveRDS(array_info, file = paste0(o$pth$array_info, parent, ".rds"))
@@ -416,7 +416,7 @@ parse_array_lhc = function(y, scenario) {
         rename(setNames(array_vars, array_info$vars$variable_id)) %>%
         pivot_longer(cols = -scenario, 
                      names_to = "variable_id") %>%
-        setDT()
+        as.data.table()
       
       # Save this info for use when collating all results
       saveRDS(array_info, file = paste0(o$pth$array_info, parent, ".rds"))

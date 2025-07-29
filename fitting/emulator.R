@@ -42,7 +42,7 @@ train_emulator = function(fit, r_idx) {
     group_by_at(c("paramset_id", params)) %>%
     summarise(obj_value = mean(obj_value)) %>%
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   # ---- Train model emulator ----
   
@@ -202,7 +202,7 @@ train_predictor = function(data, info, opts) {
     group_by_at(c("scenario", params)) %>%
     summarise(value = mean(value)) %>%
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   # ---- Train outcome predictor ----
   

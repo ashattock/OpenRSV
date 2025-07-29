@@ -80,7 +80,7 @@ sample_uncertainty = function() {
     pivot_longer(cols = -param_set, 
                  names_to = "param") %>%
     arrange(param_set, param) %>%
-    setDT()
+    as.data.table()
   
   # Save to file for use on cluster
   saveRDS(uncert_df, file = paste0(o$pth$uncertainty, "uncertainty.rds"))

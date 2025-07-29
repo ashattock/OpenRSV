@@ -158,7 +158,7 @@ generate_synthetic = function(opts, synthetic) {
               by = "date") %>%
     select(date, day, metric, value) %>%
     filter(!is.na(value)) %>%
-    setDT()
+    as.data.table()
   
   return(fit_data)
 }

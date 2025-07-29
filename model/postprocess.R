@@ -26,7 +26,7 @@ aggregate_results = function(input, raw_output) {
     group_by(metric) %>%
     slice(1) %>%
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   # Return out earlier if no groupings
   if (nrow(first_grouping) == 0)
@@ -42,7 +42,7 @@ aggregate_results = function(input, raw_output) {
     mutate(grouping = "none",
            group    = NA) %>%
     bind_rows(raw_output) %>%
-    setDT()
+    as.data.table()
   
   return(agg_df)
 }
@@ -208,7 +208,7 @@ group_ages = function(df, summarised = TRUE) {
                 lower = sum(lower),
                 upper = sum(upper)) %>%
       ungroup() %>%
-      setDT()
+      as.data.table()
   }
   
   # Dealing with raw, non-summarised output
@@ -219,7 +219,7 @@ group_ages = function(df, summarised = TRUE) {
       group_by(day, metric, seed, scenario, group) %>%
       summarise(value = sum(value)) %>%
       ungroup() %>%
-      setDT()
+      as.data.table()
   }
   
   return(age_df)

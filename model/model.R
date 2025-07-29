@@ -1107,7 +1107,7 @@ fn_prognosis = function(p, new_infected) {
     mutate(value = cumsum(value), 
            value = value / max(value)) %>%  # Normalise to 100% max
     ungroup() %>% 
-    setDT()
+    as.data.table()
   
   # Generate random number for every individual
   rand_df = new_infected[, .(id, rand = runif(.N))]
@@ -1600,7 +1600,7 @@ fn_immunity_infection = function(p, ppl, day_idx = 0, exposures = NULL) { #,vari
     #          max  = max(c_across(starts_with("immunity"))), 
     #          prod = 1 - prod(1 - c_across(starts_with("immunity")))) %>%
     #   ungroup() %>%
-    #   setDT()
+    #   as.data.table()
     
     # Calculate hybrid immunity for all possible methods
     #
@@ -1609,7 +1609,7 @@ fn_immunity_infection = function(p, ppl, day_idx = 0, exposures = NULL) { #,vari
       mutate(sum  = pmin(immunity_acquired + immunity_maternal, 1), 
              max  = pmax(immunity_acquired, immunity_maternal), 
              prod = 1 - (1 - immunity_acquired) * (1 - immunity_maternal)) %>%
-      setDT()
+      as.data.table()
 
     # Append these immunity values to exposures datatable
     exposures$immunity = hybrid_df[[p$hybrid_immunity]]

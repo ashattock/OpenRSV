@@ -149,7 +149,7 @@ plot_temporal = function(fig_name, ...) {
         ungroup() %>%
         mutate(metric = recode(metric, !!!f$metric_names), 
                group  = as.character(NA)) %>%
-        setDT()
+        as.data.table()
       
       # Join with plotting dataframe to ensure consistency
       fit_df = plot_df %>%
@@ -383,7 +383,7 @@ plot_impact = function(fig_name, ...) {
               lower = summarise_fn(lower), 
               upper = summarise_fn(upper)) %>%
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   # Check flag for plotting difference relative to baseline
   if (f$relative == TRUE) {
@@ -399,7 +399,7 @@ plot_impact = function(fig_name, ...) {
              upper = upper - upper[scenario == baseline_name]) %>%
       ungroup() %>%
       filter(scenario != baseline_name) %>%
-      setDT()
+      as.data.table()
   }
   
   # Append scenario grouping details if plotting by scenario groups  
@@ -768,7 +768,7 @@ plot_heatmap = function(fig_name, ...) {
       group_by(array_type, scenario, group) %>%
       summarise(value = get(f$summarise)(value)) %>%
       ungroup() %>%
-      setDT()
+      as.data.table()
     
     # If plotting by some grouping, we need to select just one
     if (f$plot_type == "group") {
@@ -808,7 +808,7 @@ plot_heatmap = function(fig_name, ...) {
       left_join(result_df, by = c("array_type", "scenario")) %>%
       pivot_wider(id_cols    = c(all_of(dim_id)), 
                   names_from = array_type) %>%
-      setDT()
+      as.data.table()
     
     # Set dif as trivial if not plotting dif array
     if (!plot_dif)
@@ -1195,7 +1195,7 @@ plot_disease_state = function(fig_name, p, states) {
                  values_to = "value") %>%
     mutate(state = factor(state, p$model_states$disease)) %>%
     arrange(state, day) %>%
-    setDT()
+    as.data.table()
   
   # Plot as lines
   g1 = ggplot(plot_df, aes(x = day, y = value)) +
@@ -1324,7 +1324,7 @@ plot_optimisation = function(fig_name, round_idx) {
                  names_to = "param") %>%
     mutate(round = as.factor(round), 
            seed  = as.factor(seed)) %>%
-    setDT()
+    as.data.table()
   
   # ID of parameter set with best mean objective value
   best_simulated_id = samples_df %>% 
@@ -1342,14 +1342,14 @@ plot_optimisation = function(fig_name, round_idx) {
     unique() %>%
     pivot_longer(cols = everything(), 
                  names_to = "param") %>%
-    setDT()
+    as.data.table()
   
   # Construct best optimisation results dataframe
   best_emulated = fit_result$result %>%
     as.data.table() %>% 
     pivot_longer(cols = everything(), 
                  names_to  = "param") %>%
-    setDT()
+    as.data.table()
   
   # Compile with bounds of optimisation process
   best_optimised = fit_result$optim$x %>%
@@ -1361,7 +1361,7 @@ plot_optimisation = function(fig_name, round_idx) {
               upper = max(value)) %>%
     ungroup() %>%
     left_join(best_emulated, by = "param") %>%
-    setDT()
+    as.data.table()
   
   # ---- Produce plot ---
   
@@ -1454,7 +1454,7 @@ plot_best_samples = function(fig_name, round_idx) {
     group_by(paramset_id) %>%
     summarise(obj_value = mean(obj_value)) %>%
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   # TODO: This scaling should be done in model.R
   
@@ -1483,7 +1483,7 @@ plot_best_samples = function(fig_name, round_idx) {
     mutate(value = cumsum(value)) %>%
     ungroup() %>%
     select(param_id, round, seed, metric, date, value) %>%
-    setDT
+    as.data.table
   
   # Also cumulatively sum data
   data_df = fit$data %>%
@@ -1492,7 +1492,7 @@ plot_best_samples = function(fig_name, round_idx) {
     group_by(metric) %>%
     mutate(value = cumsum(value)) %>%
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   # Extract parameter bounds
   param_df = data.table(param = fit$params, fit$bounds)
@@ -1531,7 +1531,7 @@ plot_best_samples = function(fig_name, round_idx) {
       unique() %>%
       pivot_longer(cols = -obj_value, 
                    names_to = "param") %>%
-      setDT()
+      as.data.table()
     
     # Plot 1: Model output plotted against data, colour signifies quality of fit
     g1 = ggplot(plot1_df, aes(x = date, y = value)) + 
@@ -1575,7 +1575,7 @@ plot_best_samples = function(fig_name, round_idx) {
         pivot_longer(cols = everything(), 
                      names_to  = "param", 
                      values_to = "value") %>%
-        setDT() 
+        as.data.table() 
       
       # Plot vertical line to show desired values
       g2 = g2 + 
@@ -1644,7 +1644,7 @@ plot_calibration_weights = function(fig_name) {
            type  = str_remove(type, "[^_]*_[^_]*_")) %>% 
     mutate(class = fct_inorder(class),
            type  = fct_inorder(type)) %>%
-    setDT()
+    as.data.table()
   
   # Plot metric x class grid of weight options (for this setting)
   g = ggplot(plot_df, aes(x = date, y = value, colour = type)) +
@@ -1731,7 +1731,7 @@ plot_lhc_diagnostics = function(fig_name, parent) {
                  names_to = "variable") %>%
     mutate(endpoint = fct_inorder(endpoint)) %>%
     select(variable, value, endpoint, outcome) %>%
-    setDT()
+    as.data.table()
   
   # Plot relationship between each input and actual output
   g1 = ggplot(data_df) + 
@@ -1871,7 +1871,7 @@ plot_lhc_endpoints = function(fig_name,
     }
     
     # Take full factorial grid of combinations
-    vars_df = setDT(cross_df(vars))
+    vars_df = as.data.table(cross_df(vars))
   }
   
   # Parse variable strings into values
@@ -2091,7 +2091,7 @@ plot_network_properties = function(fig_name, model_input, network) {
     group_by(age_group) %>%
     summarise(n = sum(n)) %>%
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   # ---- Fig a) Number of contacts per person ----
   
@@ -2261,7 +2261,7 @@ plot_contact_matrices = function(fig_name, model_input, network) {
     mutate(count = count / max(count)) %>%
     pivot_longer(cols = c(count, proportion), 
                  names_to = "type") %>%
-    setDT()
+    as.data.table()
   
   # Fill missing with NA for prettier figures
   plot_df = grouped_df %>%
@@ -2570,7 +2570,7 @@ plot_immunity_profiles = function(fig_name, model_input) {
     filter(day <= n_days) %>%
     mutate(value = value * 100, 
            type = factor(immunity_dict[type], levels = unname(immunity_dict))) %>%
-    setDT()
+    as.data.table()
   
   # ... of which is transmission blocking
   area_df = line_df %>%
@@ -2651,7 +2651,7 @@ plot_severity_age = function(fig_name, model_input) {
     # mutate(value = value * severity_scaler) %>%
     mutate(state = recode(state, !!!state_dict), 
            state = factor(state, state_dict)) %>%
-    setDT()
+    as.data.table()
   
   # Plot as a stacked area by age
   g = ggplot(plot_df, aes(x = age, y = value, fill = state)) + 
@@ -2712,7 +2712,7 @@ plot_severity_factors = function(fig_name, model_input) {
     ungroup() %>%
     mutate(state   = factor(state,   names(state_dict)),
            variant = factor(variant, model_input$variants$id)) %>%
-    setDT()
+    as.data.table()
   
   # Plot severity in a dose x exposure grid
   g = ggplot(plot_df) +
@@ -2838,14 +2838,14 @@ plot_seasonality_profile = function(fig_name, ..., labels = NULL, colours = NULL
     group_by(id, name, metric) %>%
     mutate(value = min(value)) %>%
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   # Text to accompany minimum lines
   text_df = plot_df %>%
     group_by(id, name, metric) %>%
     slice_min(value, with_ties = FALSE) %>%
     mutate(text = paste("Peak summer\n effect:", value)) %>%
-    setDT()
+    as.data.table()
   
   # Plot all seasonality profiles provided
   g = ggplot(plot_df) + 
@@ -2918,7 +2918,7 @@ plot_pollution_relationships = function(fig_name, model_input) {
                  names_to = "relationship") %>%
     mutate(relationship = fct_inorder(relationship)) %>%
     arrange(relationship) %>%
-    setDT()
+    as.data.table()
   
   # Plot the curves for all relationships
   g = ggplot(plot_df, aes(x = x, y = value, colour = relationship)) + 
@@ -3594,7 +3594,7 @@ fig_scenarios = function(args) {
                            scenario    = f$scenario_names), 
                 by = "scenario_id") %>%
       select(scenario, scenario_type, scenario_group) %>%
-      setDT()
+      as.data.table()
     
     # Store the number of groups for easy referencing
     f$n_scenario_groups = c(nrow(p$scenario_matrix), 

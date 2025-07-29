@@ -244,7 +244,7 @@ parse_yaml = function(scenario, fit = NULL, uncert = NULL, read_array = FALSE) {
   # # Concatenate variants
   # #
   # # NOTE: Novel variants may be trivial for a subset of scenarios within an analysis
-  # y$variants = setDT(bind_rows(variant_primary, variants_novel))
+  # y$variants = as.data.table(bind_rows(variant_primary, variants_novel))
   # 
   # # Remove redundant items
   # y[c("variant_primary", "variants_novel")] = NULL
@@ -427,7 +427,7 @@ parse_yaml = function(scenario, fit = NULL, uncert = NULL, read_array = FALSE) {
   # v$profile = y$booster_profile = rep(NA, n_days_total)
   # 
   # # Extract efficacy details for the vaccine
-  # efficacy_df = setDT(v$efficacy)
+  # efficacy_df = as.data.table(v$efficacy)
   # 
   # # One row for each dose
   # n_doses = nrow(efficacy_df)
@@ -651,7 +651,7 @@ parse_yaml = function(scenario, fit = NULL, uncert = NULL, read_array = FALSE) {
   #   mutate(treat_prob = coverage * value, 
   #          treat_prob = ifelse(is.na(treat_prob), 0, treat_prob)) %>%
   #   select(priority_group = id, disease_state, treat_prob) %>%
-  #   setDT()
+  #   as.data.table()
   # 
   # # Remove redundant items
   # y[c("treat_rollout")] = NULL

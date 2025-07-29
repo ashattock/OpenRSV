@@ -52,7 +52,7 @@ prognosis_probabilities = function(y) {
                                hosp = p_hosp, 
                                dead = p_dead) %>%
     pivot_longer(cols = -age, names_to = "state") %>%
-    setDT()
+    as.data.table()
   
   # ---- Vaccine severity and dose/exposure-response relationships ----
   
@@ -84,7 +84,7 @@ prognosis_probabilities = function(y) {
   #   group_by(variant, vaccine_doses, num_infections, state) %>%
   #   summarise(value = prod(value)) %>%
   #   ungroup() %>%
-  #   setDT()
+  #   as.data.table()
   # 
   # # Repeat the dataframe for care-seeking and non-care-seeking severe states
   # y$prognosis$severity = 

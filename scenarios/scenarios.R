@@ -152,7 +152,7 @@ create_sim_id = function(uncert_df, all_scenarios) {
            seed_num  = as.numeric(seed_id)) %>%
     select(sim_id, scenario, param_set, seed_num) %>%
     arrange(scenario, param_set, seed_num) %>%
-    setDT()
+    as.data.table()
   
   return(sim_df)
 }

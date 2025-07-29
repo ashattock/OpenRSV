@@ -439,7 +439,7 @@ quality_of_fit = function(fit, r_idx, do_plot = FALSE) {
     group_by(day, date) %>%
     slice_min(report) %>%
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   browser()
   
@@ -475,7 +475,7 @@ quality_of_fit = function(fit, r_idx, do_plot = FALSE) {
     group_by(param_id, round, seed, metric, date = report) %>%
     summarise(value = sum(value)) %>%
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   browser() # We've removed Re functionality
   
@@ -493,7 +493,7 @@ quality_of_fit = function(fit, r_idx, do_plot = FALSE) {
     group_by(param_id, round, seed) %>%
     summarise(obj_value = log(sum(err) + 1)) %>% 
     ungroup() %>%
-    setDT()
+    as.data.table()
   
   # Join parameter sets to obj values and normalise error
   samples_df = paramset_df %>%
@@ -550,7 +550,7 @@ format_weights = function(data, model_input, all = FALSE) {
     pivot_longer(cols = everything(), 
                  names_to  = "metric", 
                  values_to = "w_metric") %>% 
-    setDT()
+    as.data.table()
   
   # All possible time and peak weights
   weight_all_df = data %>%
@@ -570,7 +570,7 @@ format_weights = function(data, model_input, all = FALSE) {
     # Join with metric weights...
     ungroup() %>%
     left_join(w_metric, by = "metric") %>%
-    setDT()
+    as.data.table()
   
   # We may want this full dataframe for plotting purposes
   if (all == TRUE)
