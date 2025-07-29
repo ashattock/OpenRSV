@@ -43,10 +43,18 @@ src_files = setdiff(all_files, no_src)
 for (file in src_files)
   source(file)
 
+# All C++ files- we'll load each one
+cpp_files = list.files(pattern = ".+\\.cpp$", recursive = TRUE)
+
+# Source each of these files
+for (file in cpp_files)
+  sourceCpp(file)
+
 # ---- Define packages ----
 
 # Complete list of all packages required for this project
 packages = c(
+  "Rcpp",           # Integration of R and C++, used for core model
   "tidyverse",      # Includes ggplot2, dplyr, tidyr (www.tidyverse.org/packages/)
   "magrittr",       # Additional pipe operators, such as %<>%
   "data.table",     # Next generation dataframes
@@ -56,6 +64,7 @@ packages = c(
   "gsubfn",         # Output multiple variables from functions
   "wrapr",          # Convenience functions (eg qc)
   "stats",          # Statistical calculations and random number generation
+  "collapse",       # Lightning fast functions to use inplace of stats
   "matrixStats",    # Matrix row and column operations
   "tgp",            # Latin hypercube sampler
   "hetGP",          # Gaussian Process model and acquisition functions
