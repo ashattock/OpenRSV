@@ -3,6 +3,7 @@
 #
 # Main launch function for OpenRSV
 #
+# Written by AJ Shattock (andrew.shattock@uwa.edu.au)
 ###########################################################
 
 # Set working directory to sourced file

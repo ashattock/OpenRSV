@@ -52,35 +52,48 @@ aggregate_results = function(input, raw_output) {
 # ---------------------------------------------------------
 process_results = function(result, raw_output) {
   
-  # NOTE: Datatable syntax used here for speed - can be an expensive process
-  
   # Aggregate groupings for appropriate metrics
-  agg_df = aggregate_results(result$input, raw_output)
+  #
+  # TODO: Put this variable ordering inside of aggregate_results
+  agg_df = aggregate_results(result$input, raw_output) %>%
+    select(scenario, metric, day, grouping, group, seed, value)
+  
+  # Short hand for lower and upper quantiles
+  q1 = o$quantiles[1]
+  q2 = o$quantiles[2]
   
   # Create key summary statistics across seeds
-  result$output =
-    agg_df[, .(mean   = mean(value),
-               median = quantile(value, 0.5, na.rm = TRUE),
-               lower  = quantile(value, o$quantiles[1], na.rm = TRUE),
-               upper  = quantile(value, o$quantiles[2], na.rm = TRUE)),
-           keyby = .(day, metric, grouping, group, scenario)
-    ][order(metric, grouping, group, day)]
+  result$output = agg_df %>%
+    lazy_dt() %>%
+    group_not(seed, value) %>%
+    summarise(
+      mean   = mean(value, na.rm = TRUE),
+      median = fquantile(value, 0.5, na.rm = TRUE),
+      lower  = fquantile(value, q1,  na.rm = TRUE),
+      upper  = fquantile(value, q2,  na.rm = TRUE)) %>%
+    ungroup() %>%
+    as.data.table()
   
   # Metrics that can be cumulatively summed
   cum_metrics = result$input$metrics$df[cumulative == TRUE, metric]
   
-  # Cumulatively sum all values
-  cum_df = agg_df[metric %in% cum_metrics, ]
-  cum_df[, cum_value := cumsum(value), by = .(metric, grouping, group, scenario, seed)]
-  
-  # ...then compute quantiles across seeds
-  result$cum_output = 
-    cum_df[, .(mean   = mean(cum_value), 
-               median = quantile(cum_value, 0.5), 
-               lower  = quantile(cum_value, o$quantiles[1]), 
-               upper  = quantile(cum_value, o$quantiles[2])), 
-           keyby = .(day, metric, grouping, group, scenario)
-    ][order(metric, grouping, group, day)]
+  # Do the same for for cumulative values
+  result$cum_output = agg_df %>%
+    lazy_dt() %>%
+    filter(metric %in% cum_metrics) %>%
+    # Cumulatively sum over time...
+    group_not(day, value) %>%
+    mutate(value = cumsum(value)) %>%
+    ungroup() %>%
+    # Summarise over seeds...
+    group_not(seed, value) %>%
+    summarise(
+      mean   = mean(value, na.rm = TRUE),
+      median = fquantile(value, 0.5, na.rm = TRUE),
+      lower  = fquantile(value, q1,  na.rm = TRUE),
+      upper  = fquantile(value, q2,  na.rm = TRUE)) %>%
+    ungroup() %>%
+    as.data.table()
   
   return(result)
 }

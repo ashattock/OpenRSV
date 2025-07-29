@@ -207,6 +207,16 @@ format_date = function(dates, convert = "ymd") {
 }
 
 # ---------------------------------------------------------
+# Wrapper function for group_by(across(-c(x, y)))
+# ---------------------------------------------------------
+group_not = function(x, ...) {
+  args = sapply(rlang::ensyms(...), rlang::as_string)
+  vars = setdiff(tbl_vars(x), args)
+  y = group_by(x, across(all_of(vars)))
+  return(y)
+}
+
+# ---------------------------------------------------------
 # Convert list to datatable
 # ---------------------------------------------------------
 list2dt = function(x, ...) {
